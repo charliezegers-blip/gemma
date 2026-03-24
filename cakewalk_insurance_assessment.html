@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cakewalk Insurance Assessment</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f6f6f4;
+    --bg-info: #e6f1fb;
+    --bg-warning: #faeeda;
+    --bg-danger: #fcebeb;
+    --text-primary: #1a1a18;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --text-info: #0c447c;
+    --text-warning: #854f0b;
+    --text-danger: #a32d2d;
+    --border: rgba(0,0,0,0.12);
+    --border-md: rgba(0,0,0,0.22);
+    --border-info: #378add;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --brand: #0c447c;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg-secondary);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .shell {
+    background: var(--bg);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 660px;
+    overflow: hidden;
+  }
+
+  .topbar {
+    background: var(--brand);
+    padding: 1.1rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-logo {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .topbar-logo svg { width: 16px; height: 16px; fill: white; }
+  .topbar-name { font-size: 15px; font-weight: 600; color: white; letter-spacing: -0.01em; }
+  .topbar-tag { font-size: 12px; color: rgba(255,255,255,0.6); margin-left: auto; }
+
+  .body { padding: 1.75rem; }
+
+  .prog-track { height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; }
+  .prog-fill { height: 100%; background: var(--brand); border-radius: 2px; transition: width 0.35s ease; }
+
+  .step-lbl { font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 0.35rem; }
+  .q-text { font-size: 19px; font-weight: 600; color: var(--text-primary); line-height: 1.35; margin-bottom: 0.35rem; }
+  .q-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem; }
+
+  .opts { display: grid; gap: 8px; }
+  .opt {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 0.85rem 1.1rem;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .opt:hover { background: var(--bg-secondary); border-color: var(--border-md); }
+  .opt.sel { border: 2px solid var(--border-info); background: var(--bg-info); }
+  .opt-lbl { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .opt-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
+  .btn-back { font-size: 13px; color: var(--text-tertiary); background: none; border: none; cursor: pointer; padding: 8px 0; }
+  .btn-back:hover { color: var(--text-secondary); }
+  .btn-next {
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 10px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.35;
+    transition: opacity 0.15s, background 0.15s;
+    pointer-events: none;
+  }
+  .btn-next.on { opacity: 1; pointer-events: auto; }
+  .btn-next.on:hover { background: #185fa5; }
+
+  /* Results */
+  .r-intro { margin-bottom: 1.35rem; }
+  .r-eyebrow { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 0.3rem; }
+  .r-title { font-size: 19px; font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem; }
+  .r-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  .pc {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.1rem;
+    margin-bottom: 8px;
+  }
+  .pc.top { border: 2px solid var(--border-info); }
+
+  .ph { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 7px; gap: 8px; }
+  .pn { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
+  .bh { background: var(--bg-danger); color: var(--text-danger); }
+  .bm { background: var(--bg-warning); color: var(--text-warning); }
+  .bl { background: var(--bg-secondary); color: var(--text-secondary); }
+
+  .pitch { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 9px; }
+  .dp-lbl { font-size: 11px; color: var(--text-tertiary); margin-bottom: 5px; }
+  .dp-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .dp { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: var(--bg-info); color: var(--text-info); font-weight: 500; }
+
+  .restart {
+    display: block; width: 100%; margin-top: 1.25rem;
+    padding: 11px; background: none;
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-md);
+    font-size: 13px; color: var(--text-secondary);
+    cursor: pointer; text-align: center;
+    font-family: var(--font);
+    transition: background 0.12s;
+  }
+  .restart:hover { background: var(--bg-secondary); }
+
+  .footer { padding: 1rem 1.75rem; border-top: 1px solid var(--border); text-align: center; }
+  .footer p { font-size: 11px; color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+    </div>
+    <span class="topbar-name">Cakewalk</span>
+    <span class="topbar-tag">Benefits Assessment</span>
+  </div>
+
+  <div class="body">
+    <div id="qv">
+      <div class="prog-track"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+      <div class="step-lbl" id="slbl"></div>
+      <div class="q-text" id="qtxt"></div>
+      <div class="q-sub" id="qsub"></div>
+      <div class="opts" id="opts"></div>
+      <div class="nav">
+        <button class="btn-back" id="bbk" onclick="goBack()">← Back</button>
+        <button class="btn-next" id="bnx" onclick="goNext()">Continue</button>
+      </div>
+    </div>
+    <div id="rv" style="display:none"></div>
+  </div>
+
+  <div class="footer">
+    <p>This assessment is for educational purposes only and does not constitute insurance advice. Speak with a licensed benefits advisor for personalized recommendations.</p>
+  </div>
+</div>
+
+<script>
+const Qs=[
+  {id:'dependents',text:'How many people financially depend on you?',sub:'Include a spouse, partner, children, or anyone relying on your income to maintain their lifestyle.',opts:[
+    {v:0,l:'Just me',d:'No financial dependents'},
+    {v:1,l:'1–2 dependents',d:'Spouse, partner, or a child'},
+    {v:2,l:'3 or more',d:'Larger family or extended dependents'}
+  ]},
+  {id:'earner',text:'What is your role as an income earner?',sub:'This determines how much your household would be affected if you were unable to work.',opts:[
+    {v:0,l:'Dual income household',d:'My partner also works full-time'},
+    {v:1,l:'Primary earner',d:'I earn significantly more than my partner'},
+    {v:2,l:'Sole earner',d:'My household depends entirely on my income'}
+  ]},
+  {id:'debt',text:'How significant are your current financial obligations?',sub:"Outstanding debts don't pause if you can't work — understanding your obligations shapes your coverage needs.",opts:[
+    {v:0,l:'Minimal',d:'No mortgage, little to no recurring debt'},
+    {v:1,l:'Moderate',d:'Car payments, student loans, or rent'},
+    {v:2,l:'Significant',d:'Mortgage and/or multiple loan obligations'}
+  ]},
+  {id:'job',text:'How would you describe your work environment?',sub:'Your job type affects your exposure to accidents, injury risk, and available employer benefits.',opts:[
+    {v:'office',l:'Office / desk-based',d:'Primarily sedentary, indoor work'},
+    {v:'physical',l:'Physical / outdoor',d:'Construction, trades, delivery, healthcare, etc.'},
+    {v:'mixed',l:'Mixed / on the go',d:'Some physical activity or regular travel'},
+    {v:'self',l:'Self-employed',d:'No employer-provided benefits or disability coverage'}
+  ]},
+  {id:'lifestyle',text:'How active is your lifestyle outside of work?',sub:'Sports, hobbies, and outdoor activities increase accident risk — even everyday recreational activity counts.',opts:[
+    {v:0,l:'Mostly sedentary',d:'Low physical activity in daily life'},
+    {v:1,l:'Moderately active',d:'Regular exercise, light outdoor activities'},
+    {v:2,l:'Very active',d:'Sports, hiking, cycling, or high-impact activities'}
+  ]},
+  {id:'hplan',text:'What type of health insurance do you currently have?',sub:'Your deductible level determines how much out-of-pocket exposure you carry before insurance kicks in.',opts:[
+    {v:'hdhp',l:'High-deductible plan (HDHP)',d:'Individual deductible of $1,500 or higher'},
+    {v:'low',l:'Low-deductible / comprehensive plan',d:'Richer coverage with lower cost-sharing'},
+    {v:'none',l:'No health insurance',d:'Currently uninsured'}
+  ]},
+  {id:'savings',text:'How many months of living expenses do you have saved?',sub:'Your financial cushion determines how long your household could manage without your income.',opts:[
+    {v:0,l:'Less than 1 month',d:'Little to no savings buffer'},
+    {v:1,l:'1–3 months',d:'Some savings, but limited runway'},
+    {v:2,l:'3–6 months',d:'A solid emergency fund'},
+    {v:3,l:'6 or more months',d:'Strong financial cushion'}
+  ]},
+  {id:'dental',text:'When did you last visit a dentist?',sub:'Preventive dental care is far cheaper than restorative work — coverage makes it easier to stay current.',opts:[
+    {v:0,l:'Within the last 6 months',d:'Current on routine care'},
+    {v:1,l:'6–12 months ago',d:'Slightly overdue'},
+    {v:2,l:'1–2 years ago',d:'Past due for a checkup'},
+    {v:3,l:'2+ years / never',d:'No recent dental care'}
+  ]},
+  {id:'vision',text:'What best describes your vision needs?',sub:'Vision insurance reduces the cost of exams, frames, lenses, and contacts — costs that recur every year.',opts:[
+    {v:0,l:'No vision correction needed',d:'20/20 vision, no corrective lenses'},
+    {v:1,l:'I wear glasses',d:'Prescription eyewear user'},
+    {v:2,l:'I wear contact lenses',d:'Regular contact lens expense'},
+    {v:1,l:'A family member needs vision care',d:'Spouse or child with vision needs'}
+  ]},
+  {id:'family_hx',text:'Does your family have a history of serious illness?',sub:'Hereditary risk factors are among the strongest predictors of critical illness — knowing your family history matters.',opts:[
+    {v:'none',l:'No known history',d:'No significant hereditary conditions'},
+    {v:'cancer',l:'Cancer history',d:'Parent, sibling, or grandparent with cancer'},
+    {v:'heart',l:'Heart disease history',d:'Cardiovascular conditions in immediate family'},
+    {v:'both',l:'Both cancer and heart disease',d:'Multiple hereditary risk factors'}
+  ]},
+  {id:'smoker',text:'What is your current smoking status?',sub:'Tobacco use is one of the strongest predictors of cancer, heart disease, and stroke.',opts:[
+    {v:0,l:'Never smoked',d:'No tobacco history'},
+    {v:1,l:'Former smoker',d:'Quit at least 12 months ago'},
+    {v:2,l:'Current smoker',d:'Active tobacco use'}
+  ]},
+  {id:'age',text:'What is your age range?',sub:'Age affects your statistical risk for disability, critical illness, hospitalization, and vision changes.',opts:[
+    {v:'u30',l:'Under 30',d:'Early career, lower actuarial risk'},
+    {v:'30s',l:'30–39',d:'Peak earning years, often growing a family'},
+    {v:'40s',l:'40–49',d:'Increasing health and disability risk'},
+    {v:'50p',l:'50 or older',d:'Higher probability of serious health events'}
+  ]},
+  {id:'sickleave',text:'How much paid sick or disability leave does your employer provide?',sub:'The less employer coverage you have, the more you rely on your own disability protection.',opts:[
+    {v:0,l:'None',d:'No employer-provided sick leave or short-term disability'},
+    {v:1,l:'Less than 2 weeks',d:'Minimal coverage only'},
+    {v:2,l:'2–4 weeks',d:'Moderate coverage'},
+    {v:3,l:'More than 4 weeks',d:'Generous employer coverage'}
+  ]},
+  {id:'fplan',text:'Are you planning to grow your family in the next 2 years?',sub:'Pregnancy and childbirth are the leading cause of short-term disability claims — planning ahead matters.',opts:[
+    {v:'yes',l:'Yes, planning to have children',d:'Pregnancy likely within the next 1–2 years'},
+    {v:'young',l:'Already have young children',d:'Children under 12 in the household'},
+    {v:'no',l:'No',d:'Not planning to add children'}
+  ]}
+];
+
+let cur=0, ans={}, selIdx=null;
+
+function render(){
+  const q=Qs[cur], tot=Qs.length;
+  document.getElementById('pf').style.width=(cur/tot*100)+'%';
+  document.getElementById('slbl').textContent='Question '+(cur+1)+' of '+tot;
+  document.getElementById('qtxt').textContent=q.text;
+  document.getElementById('qsub').textContent=q.sub;
+  const c=document.getElementById('opts');
+  c.innerHTML='';
+  selIdx=ans[q.id]!==undefined?ans[q.id].idx:null;
+  q.opts.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt'+(selIdx===i?' sel':'');
+    d.innerHTML='<div class="opt-lbl">'+o.l+'</div>'+(o.d?'<div class="opt-desc">'+o.d+'</div>':'');
+    d.onclick=()=>pick(i,o.v);
+    c.appendChild(d);
+  });
+  upd();
+  document.getElementById('bbk').style.visibility=cur===0?'hidden':'visible';
+}
+
+function pick(i,v){
+  const q=Qs[cur];
+  selIdx=i;
+  ans[q.id]={idx:i,v};
+  document.querySelectorAll('.opt').forEach((c,j)=>c.className='opt'+(j===i?' sel':''));
+  upd();
+}
+
+function upd(){
+  const b=document.getElementById('bnx');
+  const ok=ans[Qs[cur].id]!==undefined;
+  b.className='btn-next'+(ok?' on':'');
+  b.textContent=cur===Qs.length-1?'See my results':'Continue';
+}
+
+function goNext(){
+  if(!ans[Qs[cur].id])return;
+  if(cur<Qs.length-1){cur++;render();}
+  else showResults();
+}
+
+function goBack(){
+  if(cur>0){cur--;render();}
+}
+
+function gv(k){return ans[k]?ans[k].v:null;}
+
+function score(){
+  const s={life:0,acc:0,den:0,vis:0,hosp:0,ltd:0,std:0,ci:0};
+  const t={life:[],acc:[],den:[],vis:[],hosp:[],ltd:[],std:[],ci:[]};
+  const dep=gv('dependents')||0, earn=gv('earner')||0, debt=gv('debt')||0;
+  const job=gv('job'), life=gv('lifestyle')||0, hp=gv('hplan');
+  const sav=gv('savings'), dent=gv('dental'), vis=gv('vision')||0;
+  const fhx=gv('family_hx'), smk=gv('smoker')||0, age=gv('age');
+  const sl=gv('sickleave'), fp=gv('fplan');
+
+  if(dep>=1){s.life+=30;t.life.push('Has dependents');}
+  if(dep>=2){s.life+=15;}
+  if(earn>=1){s.life+=20;t.life.push('Primary or sole earner');}
+  if(debt>=2){s.life+=15;t.life.push('Significant debt obligations');}
+  if(job==='physical'){s.life+=10;t.life.push('Physical work (AD&D risk)');}
+  if(['30s','40s','50p'].includes(age)){s.life+=8;}
+
+  if(life>=2){s.acc+=35;t.acc.push('Very active lifestyle');}
+  if(life>=1){s.acc+=10;}
+  if(job==='physical'){s.acc+=30;t.acc.push('Physical job exposure');}
+  if(job==='mixed'){s.acc+=12;}
+  if(dep>=1){s.acc+=10;t.acc.push('Dependents relying on income');}
+  if(fp==='young'){s.acc+=10;t.acc.push('Young children in household');}
+
+  s.den+=12;
+  if(dent>=2){s.den+=30;t.den.push('Overdue for dental care');}
+  if(dent>=3){s.den+=20;}
+  if(dent>=1){s.den+=8;}
+  if(dep>=1){s.den+=15;t.den.push('Family coverage needs');}
+  if(age==='40s'||age==='50p'){s.den+=12;t.den.push('Age increases dental risk');}
+
+  s.vis+=5;
+  if(vis>=1){s.vis+=40;t.vis.push('Active corrective lens use');}
+  if(vis>=2){s.vis+=15;t.vis.push('Ongoing contact lens costs');}
+  if(dep>=1){s.vis+=12;t.vis.push('Family coverage needs');}
+  if(age==='40s'||age==='50p'){s.vis+=15;t.vis.push('Age-related vision changes (40+)');}
+
+  if(hp==='hdhp'){s.hosp+=40;t.hosp.push('High-deductible health plan');}
+  if(hp==='none'){s.hosp+=50;t.hosp.push('No health insurance');}
+  if(sav<=1){s.hosp+=30;t.hosp.push('Limited emergency savings');}
+  if(sav===0){s.hosp+=15;}
+  if(age==='50p'){s.hosp+=20;t.hosp.push('Higher hospitalization risk with age');}
+  if(age==='40s'){s.hosp+=10;}
+
+  if(earn>=1){s.ltd+=30;t.ltd.push('Primary or sole earner');}
+  if(earn>=2){s.ltd+=15;}
+  if(sav<=1){s.ltd+=25;t.ltd.push('Limited financial runway');}
+  if(job==='self'){s.ltd+=25;t.ltd.push('Self-employed, no employer coverage');}
+  if(sl<=1){s.ltd+=20;t.ltd.push('Minimal employer sick leave');}
+  if(debt>=2){s.ltd+=15;t.ltd.push('Ongoing debt obligations');}
+  if(age==='40s'||age==='50p'){s.ltd+=15;t.ltd.push('Disability risk increases with age');}
+
+  if(fp==='yes'){s.std+=40;t.std.push('Planning pregnancy');}
+  if(sl<=1){s.std+=30;t.std.push('Minimal employer sick leave');}
+  if(sl===0){s.std+=12;}
+  if(job==='physical'){s.std+=20;t.std.push('Higher short-term injury risk');}
+  if(earn>=1){s.std+=15;t.std.push('Income critical to household');}
+  if(sav<=1){s.std+=15;t.std.push('Limited savings buffer');}
+
+  if(fhx==='cancer'||fhx==='both'){s.ci+=40;t.ci.push('Family history of cancer');}
+  if(fhx==='heart'||fhx==='both'){s.ci+=30;t.ci.push('Family history of heart disease');}
+  if(smk>=2){s.ci+=35;t.ci.push('Current smoker');}
+  if(smk===1){s.ci+=15;t.ci.push('Former smoker');}
+  if(age==='50p'){s.ci+=25;t.ci.push('Age 50+ significantly elevates risk');}
+  if(age==='40s'){s.ci+=15;t.ci.push('Critical illness risk rises in 40s');}
+  if(hp==='hdhp'){s.ci+=12;t.ci.push('HDHP creates high out-of-pocket exposure');}
+
+  return{s,t};
+}
+
+const PI={
+  life:{name:'Life / AD&D',pitch:()=>{
+    const dep=gv('dependents')||0,earn=gv('earner')||0,debt=gv('debt')||0,job=gv('job');
+    if(dep>=1&&earn>=1)return'Your family depends on you — and that\'s exactly what life insurance is designed to protect. If you were gone tomorrow, would your household be financially stable? A life policy replaces your income so your dependents maintain their quality of life. AD&D adds protection specific to accidental death or dismemberment, a real risk given'+(job==='physical'?' your type of work.':' everyday life.');
+    if(dep>=1)return'You have people who count on your income. Life insurance ensures that if something happened to you, they wouldn\'t face financial hardship on top of grief. Even a modest policy can cover housing, education, and day-to-day expenses for years.';
+    if(debt>=2)return'Your financial obligations — mortgage, loans — don\'t disappear when you do. Life insurance ensures those debts can be settled without burdening your estate or loved ones.';
+    return'Life insurance is the foundation of a sound financial safety net. Even without current dependents, a policy locked in early costs significantly less than one purchased later when health changes.';
+  },dp:['Number of dependents','Household income role (primary/sole earner)','Outstanding debt and mortgage balance','Job type (physical work elevates AD&D need)','Age range (younger = lower cost to lock in)']},
+  acc:{name:'Accident',pitch:()=>{
+    const life=gv('lifestyle')||0,job=gv('job'),dep=gv('dependents')||0;
+    if(life>=2&&job==='physical')return'With a physically active job and an active lifestyle outside of work, your accident risk is meaningfully higher than average. Accident insurance pays a cash benefit directly to you — separate from your health plan — when you\'re treated for a covered injury. That money goes toward deductibles, lost income, or whatever you need most.';
+    if(life>=2)return'An active lifestyle is great for your health — but it comes with elevated accident risk. Accident insurance pays cash directly to you after a covered injury, bridging the gap between what your health plan covers and what you\'re actually out of pocket.';
+    if(job==='physical')return'Physical work environments see far higher rates of injury. Accident insurance pays a cash benefit for covered injuries regardless of your health insurance, helping you cover deductibles, copays, and bills during recovery.';
+    return'Even routine accidents — a fall, a fracture, a sports injury — can lead to unexpected costs. Accident insurance pays cash directly to you and can be used for anything: deductibles, transportation, or replacing lost income during recovery.';
+  },dp:['Lifestyle activity level','Job type / physical environment','Presence of dependents','Young children in household','Commute method']},
+  den:{name:'Dental',pitch:()=>{
+    const dent=gv('dental'),dep=gv('dependents')||0,age=gv('age');
+    if(dent>=2)return'It\'s been a while since your last dental visit — the longer the gap, the more likely minor issues become costly procedures. A single root canal or crown can run $1,500–3,000. Dental coverage makes preventive care affordable so small problems don\'t become expensive ones. For most people, coverage pays for itself within the first 1–2 visits.';
+    if(dep>=1)return'Family dental care adds up quickly. With dependents needing regular cleanings, X-rays, and occasional treatment, dental insurance typically pays for itself within the first year — and prevents far more expensive interventions down the road.';
+    if(age==='40s'||age==='50p')return'As you get older, the probability of needing restorative dental work — crowns, root canals, partials — increases significantly. Dental coverage makes routine care affordable and provides a meaningful benefit when you need more than a cleaning.';
+    return'Dental insurance makes preventive care routine. Two cleanings and an exam per year are usually covered at 100%, which prevents the costly restorative procedures that come from neglect.';
+  },dp:['Time since last dental visit','Number of family members covered','Age range (restoration risk increases with age)','Prior dental work history','Access to in-network providers']},
+  vis:{name:'Vision',pitch:()=>{
+    const vis=gv('vision')||0,dep=gv('dependents')||0,age=gv('age');
+    if(vis>=2)return'Contact lens wearers face real annual costs — exams, fittings, and lenses run $300–500+ per year out of pocket. Vision insurance covers your annual exam and provides a contact lens allowance, typically paying for itself in the first year.';
+    if(vis>=1)return'Glasses mean recurring costs for exams, frames, and lenses every 1–2 years. Vision insurance provides a frame and lens allowance that can cut your out-of-pocket costs significantly — plus covers your annual exam.';
+    if(dep>=1)return'Children\'s vision should be checked annually, and needs change quickly as they grow. Family vision coverage keeps exams and corrective lenses affordable.';
+    if(age==='40s'||age==='50p')return'Presbyopia — the gradual loss of near vision — typically begins in the 40s. If you\'re not wearing readers yet, you will be soon. Vision coverage ensures those changes are affordable.';
+    return'Annual eye exams detect more than just vision changes — they can identify diabetes, glaucoma, and hypertension early. Vision insurance makes it easy to stay current and is typically inexpensive to add.';
+  },dp:['Current glasses or contact lens use','Last eye exam date','Family member vision needs','Digital screen exposure','Age (presbyopia risk begins at 40)']},
+  hosp:{name:'Hospital Indemnity',pitch:()=>{
+    const hp=gv('hplan'),sav=gv('savings'),age=gv('age');
+    if(hp==='hdhp'&&sav<=1)return'A high-deductible health plan with limited savings is a significant financial vulnerability. If you\'re hospitalized, you could owe $1,500–$7,000 before your coverage kicks in — with no savings cushion to absorb it. Hospital Indemnity pays a fixed daily cash benefit for each day you\'re hospitalized, directly offsetting that exposure.';
+    if(hp==='hdhp')return'Your high-deductible plan leaves you exposed to substantial out-of-pocket costs in a hospitalization. Hospital Indemnity pays a daily cash benefit that helps cover your deductible, copays, and the everyday bills that don\'t stop when you\'re in the hospital.';
+    if(hp==='none')return'Without health insurance, a hospitalization could be financially devastating. Hospital Indemnity provides a cash benefit per day that helps manage costs, though it\'s not a substitute for comprehensive health coverage.';
+    return'Hospital Indemnity pays a fixed cash benefit per day of hospitalization — separate from your health insurance. It covers the gaps: deductibles, lost income, transportation, and expenses that pile up while you\'re recovering.';
+  },dp:['Health plan deductible level','Emergency fund size (months of runway)','Age and hospitalization probability','Chronic health conditions','Prior hospitalization history']},
+  ltd:{name:'Long Term Disability',pitch:()=>{
+    const earn=gv('earner')||0,sav=gv('savings'),sl=gv('sickleave'),job=gv('job');
+    if(earn>=2&&sav<=1)return'You\'re the sole income earner with limited savings — the combination that makes Long Term Disability most critical. One in four workers will experience a disability lasting 90+ days at some point in their career. Without LTD, your household would exhaust savings quickly and face mounting debt. LTD replaces 50–70% of your income and keeps your financial life intact.';
+    if(earn>=1)return'As the primary earner, a long-term disability would put your household under immediate strain. LTD replaces a meaningful portion of your income if illness or injury keeps you out of work for months or years — it\'s coverage your family would urgently need.';
+    if(job==='self')return'Self-employed workers have no employer disability safety net. A long-term disability without LTD coverage means zero income until you recover — which can take years for serious conditions. LTD is one of the most critical protections for the self-employed.';
+    return'Most people significantly underestimate the risk of long-term disability. Social Security Disability is hard to qualify for and provides modest benefits. LTD coverage ensures that if something serious happens, your income doesn\'t disappear.';
+  },dp:['Income role in household (primary/sole earner)','Emergency fund runway','Employer disability coverage (amount and duration)','Outstanding debt and obligations','Occupation type and physical risk','Age range']},
+  std:{name:'Short Term Disability',pitch:()=>{
+    const fp=gv('fplan'),sl=gv('sickleave'),job=gv('job'),earn=gv('earner')||0;
+    if(fp==='yes')return'If you\'re planning to have children, Short Term Disability is arguably your most urgent coverage gap. Most STD policies cover pregnancy and maternity recovery, providing income replacement during the weeks you\'re unable to work. It\'s one of the most predictable and valuable uses of disability coverage.';
+    if(sl===0||sl===1)return'With minimal employer sick leave, even a short recovery from surgery, injury, or illness could mean unpaid weeks at home. STD replaces 50–70% of your income after a short waiting period, so a minor setback doesn\'t turn into a financial crisis.';
+    if(job==='physical')return'Physical jobs carry a higher risk of short-term injuries requiring recovery time. STD coverage ensures that a sprain, fracture, or post-surgical recovery doesn\'t mean zero income while you heal.';
+    return'Short Term Disability bridges the gap when sick leave runs out and you\'re not yet eligible for Long Term Disability. Surgery, illness, injury, and maternity recovery are all common claims — and the coverage typically pays for itself with a single use.';
+  },dp:['Pregnancy or family planning timeline','Employer sick leave and STD availability','Job type and injury risk','Emergency savings buffer','Household income dependency']},
+  ci:{name:'Critical Illness / Cancer',pitch:()=>{
+    const fhx=gv('family_hx'),smk=gv('smoker')||0,age=gv('age'),hp=gv('hplan');
+    const parts=[];
+    if(fhx==='cancer'||fhx==='both')parts.push('a family history of cancer');
+    if(fhx==='heart'||fhx==='both')parts.push('a family history of heart disease');
+    if(smk>=1)parts.push(smk>=2?'current tobacco use':'a prior smoking history');
+    if(parts.length)return'With '+parts.join(' and ')+', your risk profile for a serious health event is elevated. Critical Illness insurance pays a lump-sum cash benefit upon diagnosis of a covered condition — heart attack, stroke, cancer. That money isn\'t for your medical bills (your health insurance handles those); it\'s for your mortgage, your family\'s expenses, experimental treatments, or whatever matters most when you\'re fighting to recover.';
+    if(age==='50p')return'The risk of cancer, heart attack, and stroke increases meaningfully after 50. Critical Illness insurance pays a lump-sum benefit upon diagnosis of a covered condition — cash you can use however you need, not just for medical bills.';
+    return'Critical Illness insurance provides a tax-free lump-sum benefit when you\'re diagnosed with a covered condition. It\'s not designed to cover medical bills — that\'s what health insurance does. It\'s designed to cover your life: income replacement, mortgage, out-of-network care, or family expenses during treatment.';
+  },dp:['Family history of cancer or heart disease','Smoking status','Age range','Health plan out-of-pocket maximum','Chronic health conditions']}
+};
+
+function bpri(sc){
+  if(sc>=75)return{l:'High priority',c:'bh'};
+  if(sc>=38)return{l:'Recommended',c:'bm'};
+  return{l:'Consider',c:'bl'};
+}
+
+function showResults(){
+  document.getElementById('qv').style.display='none';
+  const rv=document.getElementById('rv');
+  rv.style.display='block';
+  const {s,t}=score();
+  const ranked=Object.entries(s).sort((a,b)=>b[1]-a[1]);
+  let html=`<div class="r-intro">
+    <div class="r-eyebrow">Your personalized assessment</div>
+    <div class="r-title">Here's what you need — and why</div>
+    <div class="r-sub">Products ranked by relevance to your situation. Highlighted tags show which of your answers drove each recommendation.</div>
+  </div>`;
+  ranked.forEach(([k,sc],i)=>{
+    const info=PI[k];
+    const pri=bpri(sc);
+    const trigs=t[k]||[];
+    const isTop=i<3;
+    html+=`<div class="pc${isTop?' top':''}">
+      <div class="ph">
+        <div class="pn">${info.name}</div>
+        <span class="badge ${pri.c}">${pri.l}</span>
+      </div>
+      <div class="pitch">${info.pitch()}</div>
+      ${trigs.length?`<div class="dp-lbl">Key factors from your answers</div><div class="dp-row">${trigs.map(tt=>`<span class="dp">${tt}</span>`).join('')}</div>`:''}
+    </div>`;
+  });
+  html+=`<button class="restart" onclick="restart()">Start over with different answers</button>`;
+  rv.innerHTML=html;
+  document.getElementById('pf').style.width='100%';
+}
+
+function restart(){
+  cur=0;ans={};selIdx=null;
+  document.getElementById('rv').style.display='none';
+  document.getElementById('qv').style.display='block';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
