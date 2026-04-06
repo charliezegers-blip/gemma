@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cakewalk Benefits — Product Availability by State</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; padding: 2rem 1rem; }
+
+  .page { max-width: 960px; margin: 0 auto; }
+
+  .page-header { margin-bottom: 1.5rem; }
+  .page-header h1 { font-size: 22px; font-weight: 500; color: #1a1a18; }
+  .page-header p { font-size: 13px; color: #5f5e5a; margin-top: 5px; }
+  .page-header .updated { font-size: 11px; color: #888780; margin-top: 4px; }
+
+  .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .metric { background: #f1efe8; border-radius: 8px; padding: 10px 14px; }
+  .metric-label { font-size: 10px; color: #5f5e5a; text-transform: uppercase; letter-spacing: 0.06em; }
+  .metric-value { font-size: 24px; font-weight: 500; margin-top: 2px; }
+  .metric-value.green { color: #0f6e56; }
+  .metric-value.red { color: #993c1d; }
+  .metric-value.blue { color: #185fa5; }
+  .metric-value.amber { color: #854f0b; }
+
+  .controls { display: flex; gap: 7px; margin-bottom: 0.75rem; flex-wrap: wrap; align-items: center; }
+  .controls-label { font-size: 12px; color: #888780; margin-right: 2px; }
+  .filter-btn { font-size: 12px; padding: 5px 13px; border-radius: 20px; border: 0.5px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; color: #5f5e5a; transition: all 0.15s; }
+  .filter-btn:hover { border-color: rgba(0,0,0,0.4); color: #1a1a18; }
+  .filter-btn.active { background: #1a1a18; color: #fff; border-color: #1a1a18; }
+
+  .section-label { font-size: 10px; font-weight: 500; color: #888780; text-transform: uppercase; letter-spacing: 0.07em; margin: 0.75rem 0 0.5rem; }
+
+  .map-wrap { overflow-x: auto; padding-bottom: 4px; }
+  .state-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 44px);
+    grid-template-rows: repeat(8, 44px);
+    gap: 4px;
+    width: fit-content;
+  }
+  .tile {
+    width: 44px; height: 44px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500;
+    cursor: default;
+    border: 0.5px solid transparent;
+    transition: transform 0.15s;
+    position: relative;
+  }
+  .tile:hover { transform: scale(1.12); z-index: 10; }
+  .tile[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a18;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    white-space: pre;
+    pointer-events: none;
+    z-index: 100;
+    line-height: 1.5;
+  }
+
+  .tile.approved  { background: #e1f5ee; color: #085041; border-color: #5dcaa5; }
+  .tile.not-avail { background: #faece7; color: #712b13; border-color: #f0997b; }
+  .tile.w-ready   { background: #e6f1fb; color: #0c447c; border-color: #85b7eb; }
+  .tile.w-limited { background: #faeeda; color: #633806; border-color: #ef9f27; }
+  .tile.w-none    { background: #fcebeb; color: #791f1f; border-color: #f09595; }
+  .tile.w-novis   { background: #fbeaf0; color: #72243e; border-color: #ed93b1; }
+  .tile.w-notready{ background: #f1efe8; color: #444441; border-color: #b4b2a9; }
+  .tile.w-nodata  { background: #f1efe8; color: #888780; border-color: #d3d1c7; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 0.75rem 0 0; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #5f5e5a; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .leg-approved  { background: #5dcaa5; }
+  .leg-notavail  { background: #f0997b; }
+  .leg-wready    { background: #85b7eb; }
+  .leg-wlimited  { background: #ef9f27; }
+  .leg-wnone     { background: #f09595; }
+  .leg-wnovis    { background: #ed93b1; }
+  .leg-wnotready { background: #b4b2a9; }
+  .leg-wnodata   { background: #d3d1c7; }
+
+  hr.divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.1); margin: 1.25rem 0; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { font-size: 11px; font-weight: 500; color: #888780; text-align: left; padding: 7px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.12); white-space: nowrap; cursor: pointer; user-select: none; }
+  thead th:hover { color: #1a1a18; }
+  tbody td { padding: 7px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.07); color: #1a1a18; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f5f4f0; }
+
+  .badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 10px; white-space: nowrap; }
+  .b-approved  { background: #e1f5ee; color: #085041; }
+  .b-notavail  { background: #faece7; color: #712b13; }
+  .b-wready    { background: #e6f1fb; color: #0c447c; }
+  .b-wlimited  { background: #faeeda; color: #633806; }
+  .b-wnone     { background: #fcebeb; color: #791f1f; }
+  .b-wnovis    { background: #fbeaf0; color: #72243e; }
+  .b-wnotready { background: #f1efe8; color: #444441; }
+  .b-wnodata   { background: #f1efe8; color: #888780; }
+
+  @media (max-width: 600px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .card { border: 1px solid #ddd; box-shadow: none; }
+    .filter-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <h1>Product availability by state</h1>
+    <p>Cakewalk Benefits — geographic eligibility for Prudential (life &amp; disability) and Websurance products</p>
+    <p class="updated">Source: WPF_Members.xlsx — Prudential Status 4-3, Approved States tabs</p>
+  </div>
+
+  <div class="card">
+    <div class="metrics" id="metrics"></div>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <span class="controls-label">Show:</span>
+      <button class="filter-btn active" onclick="setView('prudential',this)">Prudential</button>
+      <button class="filter-btn" onclick="setView('websurance',this)">Websurance</button>
+    </div>
+    <div class="section-label" id="map-label">Prudential life &amp; disability — approved states</div>
+    <div class="map-wrap"><div class="state-grid" id="map"></div></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <span class="controls-label">Filter:</span>
+      <button class="filter-btn active" id="f-all"     onclick="filterTable('all')">All states</button>
+      <button class="filter-btn"        id="f-pru-yes" onclick="filterTable('pru-yes')">Prudential approved</button>
+      <button class="filter-btn"        id="f-pru-no"  onclick="filterTable('pru-no')">Prudential not available</button>
+      <button class="filter-btn"        id="f-web-yes" onclick="filterTable('web-yes')">Websurance available</button>
+    </div>
+    <hr class="divider">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th onclick="sortTable('abbr')">State ↕</th>
+          <th onclick="sortTable('name')">Name ↕</th>
+          <th onclick="sortTable('pru')">Prudential (life &amp; disability) ↕</th>
+          <th onclick="sortTable('web')">Websurance ↕</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+<script>
+const STATES = {
+  AL:{name:'Alabama',pru:'approved',web:'nodata'},
+  AK:{name:'Alaska',pru:'notavail',web:'nodata'},
+  AZ:{name:'Arizona',pru:'approved',web:'ready'},
+  AR:{name:'Arkansas',pru:'notavail',web:'nodata'},
+  CA:{name:'California',pru:'approved',web:'ready'},
+  CO:{name:'Colorado',pru:'notavail',web:'notready'},
+  CT:{name:'Connecticut',pru:'approved',web:'nodata'},
+  DE:{name:'Delaware',pru:'approved',web:'nodata'},
+  DC:{name:'District of Columbia',pru:'approved',web:'nodata'},
+  FL:{name:'Florida',pru:'notavail',web:'nodata'},
+  GA:{name:'Georgia',pru:'approved',web:'ready'},
+  HI:{name:'Hawaii',pru:'approved',web:'nodata'},
+  ID:{name:'Idaho',pru:'notavail',web:'nodata'},
+  IL:{name:'Illinois',pru:'approved',web:'ready'},
+  IN:{name:'Indiana',pru:'approved',web:'ready'},
+  IA:{name:'Iowa',pru:'approved',web:'nodata'},
+  KS:{name:'Kansas',pru:'approved',web:'nodata'},
+  KY:{name:'Kentucky',pru:'approved',web:'nodata'},
+  LA:{name:'Louisiana',pru:'notavail',web:'nodata'},
+  ME:{name:'Maine',pru:'notavail',web:'nodata'},
+  MD:{name:'Maryland',pru:'notavail',web:'nodata'},
+  MA:{name:'Massachusetts',pru:'approved',web:'nodata'},
+  MI:{name:'Michigan',pru:'approved',web:'ready'},
+  MN:{name:'Minnesota',pru:'approved',web:'nodata'},
+  MS:{name:'Mississippi',pru:'approved',web:'nodata'},
+  MO:{name:'Missouri',pru:'approved',web:'nodata'},
+  MT:{name:'Montana',pru:'notavail',web:'nodata'},
+  NE:{name:'Nebraska',pru:'approved',web:'nodata'},
+  NV:{name:'Nevada',pru:'notavail',web:'nodata'},
+  NH:{name:'New Hampshire',pru:'notavail',web:'limited'},
+  NJ:{name:'New Jersey',pru:'approved',web:'nodata'},
+  NM:{name:'New Mexico',pru:'notavail',web:'none'},
+  NY:{name:'New York',pru:'approved',web:'ready'},
+  NC:{name:'North Carolina',pru:'notavail',web:'nodata'},
+  ND:{name:'North Dakota',pru:'approved',web:'nodata'},
+  OH:{name:'Ohio',pru:'approved',web:'ready'},
+  OK:{name:'Oklahoma',pru:'approved',web:'ready'},
+  OR:{name:'Oregon',pru:'notavail',web:'limited'},
+  PA:{name:'Pennsylvania',pru:'notavail',web:'notready'},
+  RI:{name:'Rhode Island',pru:'approved',web:'nodata'},
+  SC:{name:'South Carolina',pru:'approved',web:'nodata'},
+  SD:{name:'South Dakota',pru:'notavail',web:'none'},
+  TN:{name:'Tennessee',pru:'approved',web:'ready'},
+  TX:{name:'Texas',pru:'notavail',web:'notready'},
+  UT:{name:'Utah',pru:'notavail',web:'novis'},
+  VT:{name:'Vermont',pru:'notavail',web:'nodata'},
+  VA:{name:'Virginia',pru:'approved',web:'ready'},
+  WA:{name:'Washington',pru:'notavail',web:'nodata'},
+  WV:{name:'West Virginia',pru:'approved',web:'nodata'},
+  WI:{name:'Wisconsin',pru:'approved',web:'nodata'},
+  WY:{name:'Wyoming',pru:'notavail',web:'nodata'}
+};
+
+const LAYOUT = [
+  ['AK',1,1],['ME',1,12],
+  ['VT',2,11],['NH',2,12],
+  ['WA',3,1],['ID',3,2],['MT',3,3],['ND',3,4],['MN',3,5],['WI',3,6],['MI',3,7],['NY',3,9],['MA',3,10],['RI',3,11],
+  ['OR',4,1],['NV',4,2],['WY',4,3],['SD',4,4],['IA',4,5],['IL',4,6],['IN',4,7],['OH',4,8],['PA',4,9],['NJ',4,10],['CT',4,11],
+  ['CA',5,1],['UT',5,2],['CO',5,3],['NE',5,4],['MO',5,5],['KY',5,6],['WV',5,7],['VA',5,8],['MD',5,9],['DE',5,10],
+  ['AZ',6,2],['NM',6,3],['KS',6,4],['AR',6,5],['TN',6,6],['NC',6,7],['SC',6,8],['DC',6,9],
+  ['HI',7,1],['OK',7,4],['LA',7,5],['MS',7,6],['AL',7,7],['GA',7,8],
+  ['TX',8,4],['FL',8,8]
+];
+
+const PRU_LABELS = {approved:'Approved',notavail:'Not available'};
+const WEB_LABELS = {ready:'Available',limited:'Life + ADD only',none:'No products',novis:'No vision',notready:'Not yet approved',nodata:'Not reviewed'};
+
+let currentView='prudential', sortKey='name', sortDir=1, filterKey='all';
+
+function pruClass(v){return v==='approved'?'approved':'not-avail';}
+function webClass(v){return {ready:'w-ready',limited:'w-limited',none:'w-none',novis:'w-novis',notready:'w-notready',nodata:'w-nodata'}[v]||'w-nodata';}
+function pruBadge(v){return `<span class="badge ${v==='approved'?'b-approved':'b-notavail'}">${PRU_LABELS[v]||v}</span>`;}
+function webBadge(v){const cls={ready:'b-wready',limited:'b-wlimited',none:'b-wnone',novis:'b-wnovis',notready:'b-wnotready',nodata:'b-wnodata'}[v]||'b-wnodata';return `<span class="badge ${cls}">${WEB_LABELS[v]||v}</span>`;}
+
+function buildMap(){
+  const map=document.getElementById('map');
+  map.innerHTML='';
+  LAYOUT.forEach(([abbr,r,c])=>{
+    const s=STATES[abbr];
+    const div=document.createElement('div');
+    div.className='tile';
+    div.style.gridRow=r;
+    div.style.gridColumn=c;
+    div.title=`${s.name}\nPrudential: ${PRU_LABELS[s.pru]}\nWebsurance: ${WEB_LABELS[s.web]}`;
+    div.classList.add(currentView==='prudential'?pruClass(s.pru):webClass(s.web));
+    div.textContent=abbr;
+    map.appendChild(div);
+  });
+}
+
+function buildLegend(){
+  const leg=document.getElementById('legend');
+  const items = currentView==='prudential'
+    ? [['leg-approved','Approved'],['leg-notavail','Not available']]
+    : [['leg-wready','Available'],['leg-wlimited','Life + ADD only'],['leg-wnone','No products'],['leg-wnovis','No vision'],['leg-wnotready','Not yet approved'],['leg-wnodata','Not reviewed']];
+  leg.innerHTML=items.map(([cls,lbl])=>`<div class="legend-item"><div class="legend-dot ${cls}"></div>${lbl}</div>`).join('');
+}
+
+function buildMetrics(){
+  const pa=Object.values(STATES).filter(s=>s.pru==='approved').length;
+  const pn=Object.values(STATES).filter(s=>s.pru==='notavail').length;
+  const wr=Object.values(STATES).filter(s=>s.web==='ready').length;
+  const wl=Object.values(STATES).filter(s=>['limited','notready','novis'].includes(s.web)).length;
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Prudential approved</div><div class="metric-value green">${pa}</div></div>
+    <div class="metric"><div class="metric-label">Prudential not available</div><div class="metric-value red">${pn}</div></div>
+    <div class="metric"><div class="metric-label">Websurance available</div><div class="metric-value blue">${wr}</div></div>
+    <div class="metric"><div class="metric-label">Websurance limited/pending</div><div class="metric-value amber">${wl}</div></div>`;
+}
+
+function setView(v,btn){
+  currentView=v;
+  document.querySelectorAll('.controls .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('map-label').innerHTML=
+    v==='prudential'?'Prudential life &amp; disability — approved states':'Websurance — product availability by state';
+  buildMap(); buildLegend();
+}
+
+function filterTable(key){
+  filterKey=key;
+  document.querySelectorAll('[id^="f-"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('f-'+key).classList.add('active');
+  renderTable();
+}
+
+function sortTable(key){
+  if(sortKey===key) sortDir*=-1; else{sortKey=key;sortDir=1;}
+  renderTable();
+}
+
+function renderTable(){
+  let rows=Object.entries(STATES).map(([abbr,s])=>({abbr,...s}));
+  if(filterKey==='pru-yes') rows=rows.filter(r=>r.pru==='approved');
+  if(filterKey==='pru-no')  rows=rows.filter(r=>r.pru==='notavail');
+  if(filterKey==='web-yes') rows=rows.filter(r=>r.web==='ready');
+  rows.sort((a,b)=>{const av=a[sortKey]||'',bv=b[sortKey]||'';return av<bv?-sortDir:av>bv?sortDir:0;});
+  document.getElementById('tbody').innerHTML=rows.map(r=>`
+    <tr>
+      <td style="font-weight:500">${r.abbr}</td>
+      <td>${r.name}</td>
+      <td>${pruBadge(r.pru)}</td>
+      <td>${webBadge(r.web)}</td>
+    </tr>`).join('');
+}
+
+buildMetrics(); buildMap(); buildLegend(); renderTable();
+</script>
+</body>
+</html>
