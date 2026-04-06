@@ -7,23 +7,22 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; padding: 2rem 1rem; }
-
   .page { max-width: 960px; margin: 0 auto; }
 
   .page-header { margin-bottom: 1.5rem; }
-  .page-header h1 { font-size: 22px; font-weight: 500; color: #1a1a18; }
+  .page-header h1 { font-size: 22px; font-weight: 500; }
   .page-header p { font-size: 13px; color: #5f5e5a; margin-top: 5px; }
-  .page-header .updated { font-size: 11px; color: #888780; margin-top: 4px; }
+  .page-header .note { font-size: 11px; color: #888780; margin-top: 4px; }
 
   .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
 
-  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .metric { background: #f1efe8; border-radius: 8px; padding: 10px 14px; }
   .metric-label { font-size: 10px; color: #5f5e5a; text-transform: uppercase; letter-spacing: 0.06em; }
   .metric-value { font-size: 24px; font-weight: 500; margin-top: 2px; }
   .metric-value.green { color: #0f6e56; }
-  .metric-value.red { color: #993c1d; }
-  .metric-value.blue { color: #185fa5; }
+  .metric-value.red   { color: #993c1d; }
+  .metric-value.blue  { color: #185fa5; }
   .metric-value.amber { color: #854f0b; }
 
   .controls { display: flex; gap: 7px; margin-bottom: 0.75rem; flex-wrap: wrap; align-items: center; }
@@ -42,6 +41,7 @@
     gap: 4px;
     width: fit-content;
   }
+
   .tile {
     width: 44px; height: 44px;
     border-radius: 6px;
@@ -53,43 +53,55 @@
     position: relative;
   }
   .tile:hover { transform: scale(1.12); z-index: 10; }
+
+  /* Tooltip */
   .tile[title]:hover::after {
     content: attr(title);
     position: absolute;
-    bottom: 110%;
-    left: 50%;
+    bottom: 110%; left: 50%;
     transform: translateX(-50%);
-    background: #1a1a18;
-    color: #fff;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 5px;
-    white-space: pre;
-    pointer-events: none;
-    z-index: 100;
-    line-height: 1.5;
+    background: #1a1a18; color: #fff;
+    font-size: 11px; padding: 5px 9px;
+    border-radius: 5px; white-space: pre;
+    pointer-events: none; z-index: 100; line-height: 1.6;
   }
 
+  /* Prudential colors */
   .tile.approved  { background: #e1f5ee; color: #085041; border-color: #5dcaa5; }
   .tile.not-avail { background: #faece7; color: #712b13; border-color: #f0997b; }
+
+  /* Websurance colors */
   .tile.w-ready   { background: #e6f1fb; color: #0c447c; border-color: #85b7eb; }
   .tile.w-limited { background: #faeeda; color: #633806; border-color: #ef9f27; }
+  .tile.w-partial { background: #faeeda; color: #633806; border-color: #ef9f27; }
   .tile.w-none    { background: #fcebeb; color: #791f1f; border-color: #f09595; }
-  .tile.w-novis   { background: #fbeaf0; color: #72243e; border-color: #ed93b1; }
-  .tile.w-notready{ background: #f1efe8; color: #444441; border-color: #b4b2a9; }
-  .tile.w-nodata  { background: #f1efe8; color: #888780; border-color: #d3d1c7; }
+
+  /* Both unavailable: diagonal hatch overlay on top of whatever base color */
+  .tile.both-unavail {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0px,
+      transparent 5px,
+      rgba(0,0,0,0.13) 5px,
+      rgba(0,0,0,0.13) 6px
+    );
+  }
 
   .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 0.75rem 0 0; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #5f5e5a; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5f5e5a; }
   .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-dot.hatched {
+    background-color: #f0997b;
+    background-image: repeating-linear-gradient(
+      -45deg, transparent 0px, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 3px
+    );
+    border: 0.5px solid #f0997b;
+  }
   .leg-approved  { background: #5dcaa5; }
   .leg-notavail  { background: #f0997b; }
   .leg-wready    { background: #85b7eb; }
-  .leg-wlimited  { background: #ef9f27; }
+  .leg-wpartial  { background: #ef9f27; }
   .leg-wnone     { background: #f09595; }
-  .leg-wnovis    { background: #ed93b1; }
-  .leg-wnotready { background: #b4b2a9; }
-  .leg-wnodata   { background: #d3d1c7; }
 
   hr.divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.1); margin: 1.25rem 0; }
 
@@ -100,23 +112,24 @@
   tbody td { padding: 7px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.07); color: #1a1a18; vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover td { background: #f5f4f0; }
+  tbody tr.both-row td { background: #fff5f5; }
+  tbody tr.both-row:hover td { background: #fee; }
 
   .badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 10px; white-space: nowrap; }
   .b-approved  { background: #e1f5ee; color: #085041; }
   .b-notavail  { background: #faece7; color: #712b13; }
   .b-wready    { background: #e6f1fb; color: #0c447c; }
-  .b-wlimited  { background: #faeeda; color: #633806; }
+  .b-wpartial  { background: #faeeda; color: #633806; }
   .b-wnone     { background: #fcebeb; color: #791f1f; }
-  .b-wnovis    { background: #fbeaf0; color: #72243e; }
-  .b-wnotready { background: #f1efe8; color: #444441; }
-  .b-wnodata   { background: #f1efe8; color: #888780; }
+
+  .both-pill { display: inline-block; font-size: 9px; font-weight: 500; padding: 2px 6px; border-radius: 8px; background: #1a1a18; color: #fff; margin-left: 5px; vertical-align: middle; letter-spacing: 0.03em; }
 
   @media (max-width: 600px) {
     .metrics { grid-template-columns: repeat(2, 1fr); }
   }
   @media print {
     body { background: #fff; padding: 0; }
-    .card { border: 1px solid #ddd; box-shadow: none; }
+    .card { border: 1px solid #ddd; }
     .filter-btn { display: none; }
   }
 </style>
@@ -127,7 +140,7 @@
   <div class="page-header">
     <h1>Product availability by state</h1>
     <p>Cakewalk Benefits — geographic eligibility for Prudential (life &amp; disability) and Websurance products</p>
-    <p class="updated">Source: WPF_Members.xlsx — Prudential Status 4-3, Approved States tabs</p>
+    <p class="note">Websurance list reflects exclusions only; unlisted states are fully available &nbsp;·&nbsp; Hatched states have no products available from either carrier</p>
   </div>
 
   <div class="card">
@@ -148,10 +161,12 @@
   <div class="card">
     <div class="controls">
       <span class="controls-label">Filter:</span>
-      <button class="filter-btn active" id="f-all"     onclick="filterTable('all')">All states</button>
-      <button class="filter-btn"        id="f-pru-yes" onclick="filterTable('pru-yes')">Prudential approved</button>
-      <button class="filter-btn"        id="f-pru-no"  onclick="filterTable('pru-no')">Prudential not available</button>
-      <button class="filter-btn"        id="f-web-yes" onclick="filterTable('web-yes')">Websurance available</button>
+      <button class="filter-btn active" id="f-all"      onclick="filterTable('all')">All states</button>
+      <button class="filter-btn"        id="f-pru-yes"  onclick="filterTable('pru-yes')">Prudential approved</button>
+      <button class="filter-btn"        id="f-pru-no"   onclick="filterTable('pru-no')">Prudential not available</button>
+      <button class="filter-btn"        id="f-web-full" onclick="filterTable('web-full')">Websurance full coverage</button>
+      <button class="filter-btn"        id="f-web-exc"  onclick="filterTable('web-exc')">Websurance restrictions</button>
+      <button class="filter-btn"        id="f-both-no"  onclick="filterTable('both-no')">Neither carrier</button>
     </div>
     <hr class="divider">
     <div class="table-wrap">
@@ -169,58 +184,67 @@
 
 </div>
 <script>
+// Websurance restrictions only. All other states = all products available.
+// web values:
+//   ready        → all products available
+//   none         → no products (NM, SD)
+//   limited      → Life & AD&D only (NH, OR)
+//   no_ci_hi     → no CI, no HI (TX)
+//   no_vis_etc   → no Vision, AX, CI, or HI (UT)
+//   no_ci        → no CI (WA)
+
 const STATES = {
-  AL:{name:'Alabama',pru:'approved',web:'nodata'},
-  AK:{name:'Alaska',pru:'notavail',web:'nodata'},
-  AZ:{name:'Arizona',pru:'approved',web:'ready'},
-  AR:{name:'Arkansas',pru:'notavail',web:'nodata'},
-  CA:{name:'California',pru:'approved',web:'ready'},
-  CO:{name:'Colorado',pru:'notavail',web:'notready'},
-  CT:{name:'Connecticut',pru:'approved',web:'nodata'},
-  DE:{name:'Delaware',pru:'approved',web:'nodata'},
-  DC:{name:'District of Columbia',pru:'approved',web:'nodata'},
-  FL:{name:'Florida',pru:'notavail',web:'nodata'},
-  GA:{name:'Georgia',pru:'approved',web:'ready'},
-  HI:{name:'Hawaii',pru:'approved',web:'nodata'},
-  ID:{name:'Idaho',pru:'notavail',web:'nodata'},
-  IL:{name:'Illinois',pru:'approved',web:'ready'},
-  IN:{name:'Indiana',pru:'approved',web:'ready'},
-  IA:{name:'Iowa',pru:'approved',web:'nodata'},
-  KS:{name:'Kansas',pru:'approved',web:'nodata'},
-  KY:{name:'Kentucky',pru:'approved',web:'nodata'},
-  LA:{name:'Louisiana',pru:'notavail',web:'nodata'},
-  ME:{name:'Maine',pru:'notavail',web:'nodata'},
-  MD:{name:'Maryland',pru:'notavail',web:'nodata'},
-  MA:{name:'Massachusetts',pru:'approved',web:'nodata'},
-  MI:{name:'Michigan',pru:'approved',web:'ready'},
-  MN:{name:'Minnesota',pru:'approved',web:'nodata'},
-  MS:{name:'Mississippi',pru:'approved',web:'nodata'},
-  MO:{name:'Missouri',pru:'approved',web:'nodata'},
-  MT:{name:'Montana',pru:'notavail',web:'nodata'},
-  NE:{name:'Nebraska',pru:'approved',web:'nodata'},
-  NV:{name:'Nevada',pru:'notavail',web:'nodata'},
-  NH:{name:'New Hampshire',pru:'notavail',web:'limited'},
-  NJ:{name:'New Jersey',pru:'approved',web:'nodata'},
-  NM:{name:'New Mexico',pru:'notavail',web:'none'},
-  NY:{name:'New York',pru:'approved',web:'ready'},
-  NC:{name:'North Carolina',pru:'notavail',web:'nodata'},
-  ND:{name:'North Dakota',pru:'approved',web:'nodata'},
-  OH:{name:'Ohio',pru:'approved',web:'ready'},
-  OK:{name:'Oklahoma',pru:'approved',web:'ready'},
-  OR:{name:'Oregon',pru:'notavail',web:'limited'},
-  PA:{name:'Pennsylvania',pru:'notavail',web:'notready'},
-  RI:{name:'Rhode Island',pru:'approved',web:'nodata'},
-  SC:{name:'South Carolina',pru:'approved',web:'nodata'},
-  SD:{name:'South Dakota',pru:'notavail',web:'none'},
-  TN:{name:'Tennessee',pru:'approved',web:'ready'},
-  TX:{name:'Texas',pru:'notavail',web:'notready'},
-  UT:{name:'Utah',pru:'notavail',web:'novis'},
-  VT:{name:'Vermont',pru:'notavail',web:'nodata'},
-  VA:{name:'Virginia',pru:'approved',web:'ready'},
-  WA:{name:'Washington',pru:'notavail',web:'nodata'},
-  WV:{name:'West Virginia',pru:'approved',web:'nodata'},
-  WI:{name:'Wisconsin',pru:'approved',web:'nodata'},
-  WY:{name:'Wyoming',pru:'notavail',web:'nodata'}
+  AL:{name:'Alabama',              pru:'approved', web:'ready'},
+  AK:{name:'Alaska',               pru:'notavail', web:'ready'},
+  AZ:{name:'Arizona',              pru:'approved', web:'ready'},
+  AR:{name:'Arkansas',             pru:'notavail', web:'ready'},
+  CA:{name:'California',           pru:'approved', web:'ready'},
+  CO:{name:'Colorado',             pru:'notavail', web:'ready'},
+  CT:{name:'Connecticut',          pru:'approved', web:'ready'},
+  DE:{name:'Delaware',             pru:'approved', web:'ready'},
+  DC:{name:'District of Columbia', pru:'approved', web:'ready'},
+  FL:{name:'Florida',              pru:'notavail', web:'ready'},
+  GA:{name:'Georgia',              pru:'approved', web:'ready'},
+  HI:{name:'Hawaii',               pru:'approved', web:'ready'},
+  ID:{name:'Idaho',                pru:'notavail', web:'ready'},
+  IL:{name:'Illinois',             pru:'approved', web:'ready'},
+  IN:{name:'Indiana',              pru:'approved', web:'ready'},
+  IA:{name:'Iowa',                 pru:'approved', web:'ready'},
+  KS:{name:'Kansas',               pru:'approved', web:'ready'},
+  KY:{name:'Kentucky',             pru:'approved', web:'ready'},
+  LA:{name:'Louisiana',            pru:'notavail', web:'ready'},
+  ME:{name:'Maine',                pru:'notavail', web:'ready'},
+  MD:{name:'Maryland',             pru:'notavail', web:'ready'},
+  MA:{name:'Massachusetts',        pru:'approved', web:'ready'},
+  MI:{name:'Michigan',             pru:'approved', web:'ready'},
+  MN:{name:'Minnesota',            pru:'approved', web:'ready'},
+  MS:{name:'Mississippi',          pru:'approved', web:'ready'},
+  MO:{name:'Missouri',             pru:'approved', web:'ready'},
+  MT:{name:'Montana',              pru:'notavail', web:'ready'},
+  NE:{name:'Nebraska',             pru:'approved', web:'ready'},
+  NV:{name:'Nevada',               pru:'notavail', web:'ready'},
+  NH:{name:'New Hampshire',        pru:'notavail', web:'limited'},
+  NJ:{name:'New Jersey',           pru:'approved', web:'ready'},
+  NM:{name:'New Mexico',           pru:'notavail', web:'none'},
+  NY:{name:'New York',             pru:'approved', web:'ready'},
+  NC:{name:'North Carolina',       pru:'notavail', web:'ready'},
+  ND:{name:'North Dakota',         pru:'approved', web:'ready'},
+  OH:{name:'Ohio',                 pru:'approved', web:'ready'},
+  OK:{name:'Oklahoma',             pru:'approved', web:'ready'},
+  OR:{name:'Oregon',               pru:'notavail', web:'limited'},
+  PA:{name:'Pennsylvania',         pru:'notavail', web:'ready'},
+  RI:{name:'Rhode Island',         pru:'approved', web:'ready'},
+  SC:{name:'South Carolina',       pru:'approved', web:'ready'},
+  SD:{name:'South Dakota',         pru:'notavail', web:'none'},
+  TN:{name:'Tennessee',            pru:'approved', web:'ready'},
+  TX:{name:'Texas',                pru:'notavail', web:'no_ci_hi'},
+  UT:{name:'Utah',                 pru:'notavail', web:'no_vis_etc'},
+  VT:{name:'Vermont',              pru:'notavail', web:'ready'},
+  VA:{name:'Virginia',             pru:'approved', web:'ready'},
+  WA:{name:'Washington',           pru:'notavail', web:'no_ci'},
+  WV:{name:'West Virginia',        pru:'approved', web:'ready'},
+  WI:{name:'Wisconsin',            pru:'approved', web:'ready'},
+  WY:{name:'Wyoming',              pru:'notavail', web:'ready'}
 };
 
 const LAYOUT = [
@@ -234,15 +258,31 @@ const LAYOUT = [
   ['TX',8,4],['FL',8,8]
 ];
 
-const PRU_LABELS = {approved:'Approved',notavail:'Not available'};
-const WEB_LABELS = {ready:'Available',limited:'Life + ADD only',none:'No products',novis:'No vision',notready:'Not yet approved',nodata:'Not reviewed'};
+const PRU_LABELS = { approved:'Approved', notavail:'Not available' };
+const WEB_LABELS = {
+  ready:       'All products available',
+  limited:     'Life & AD\u00B6D only',
+  none:        'No products',
+  no_ci_hi:   'No CI or HI',
+  no_vis_etc: 'No Vision, AX, CI, or HI',
+  no_ci:       'No CI'
+};
+
+function bothUnavail(s){ return s.pru==='notavail' && s.web==='none'; }
+function webIsRestricted(s){ return s.web!=='ready'; }
+
+function pruClass(v){ return v==='approved'?'approved':'not-avail'; }
+function webClass(v){ return v==='ready'?'w-ready': v==='none'?'w-none':'w-partial'; }
+
+function pruBadge(v){ return `<span class="badge ${v==='approved'?'b-approved':'b-notavail'}">${PRU_LABELS[v]}</span>`; }
+function webBadge(s){
+  const cls = s.web==='ready'?'b-wready': s.web==='none'?'b-wnone':'b-wpartial';
+  let html = `<span class="badge ${cls}">${WEB_LABELS[s.web]}</span>`;
+  if(bothUnavail(s)) html += `<span class="both-pill">neither carrier</span>`;
+  return html;
+}
 
 let currentView='prudential', sortKey='name', sortDir=1, filterKey='all';
-
-function pruClass(v){return v==='approved'?'approved':'not-avail';}
-function webClass(v){return {ready:'w-ready',limited:'w-limited',none:'w-none',novis:'w-novis',notready:'w-notready',nodata:'w-nodata'}[v]||'w-nodata';}
-function pruBadge(v){return `<span class="badge ${v==='approved'?'b-approved':'b-notavail'}">${PRU_LABELS[v]||v}</span>`;}
-function webBadge(v){const cls={ready:'b-wready',limited:'b-wlimited',none:'b-wnone',novis:'b-wnovis',notready:'b-wnotready',nodata:'b-wnodata'}[v]||'b-wnodata';return `<span class="badge ${cls}">${WEB_LABELS[v]||v}</span>`;}
 
 function buildMap(){
   const map=document.getElementById('map');
@@ -251,10 +291,18 @@ function buildMap(){
     const s=STATES[abbr];
     const div=document.createElement('div');
     div.className='tile';
-    div.style.gridRow=r;
-    div.style.gridColumn=c;
-    div.title=`${s.name}\nPrudential: ${PRU_LABELS[s.pru]}\nWebsurance: ${WEB_LABELS[s.web]}`;
-    div.classList.add(currentView==='prudential'?pruClass(s.pru):webClass(s.web));
+    div.style.gridRow=r; div.style.gridColumn=c;
+
+    const pruLabel = PRU_LABELS[s.pru];
+    const webLabel = WEB_LABELS[s.web];
+    div.title=`${s.name}\nPrudential: ${pruLabel}\nWebsurance: ${webLabel}`;
+
+    if(currentView==='prudential'){
+      div.classList.add(pruClass(s.pru));
+    } else {
+      div.classList.add(webClass(s.web));
+    }
+    if(bothUnavail(s)) div.classList.add('both-unavail');
     div.textContent=abbr;
     map.appendChild(div);
   });
@@ -262,29 +310,44 @@ function buildMap(){
 
 function buildLegend(){
   const leg=document.getElementById('legend');
-  const items = currentView==='prudential'
-    ? [['leg-approved','Approved'],['leg-notavail','Not available']]
-    : [['leg-wready','Available'],['leg-wlimited','Life + ADD only'],['leg-wnone','No products'],['leg-wnovis','No vision'],['leg-wnotready','Not yet approved'],['leg-wnodata','Not reviewed']];
-  leg.innerHTML=items.map(([cls,lbl])=>`<div class="legend-item"><div class="legend-dot ${cls}"></div>${lbl}</div>`).join('');
+  let items;
+  if(currentView==='prudential'){
+    items = [
+      ['leg-approved','Approved'],
+      ['leg-notavail','Not available'],
+      ['hatched','Not available (either carrier)']
+    ];
+  } else {
+    items = [
+      ['leg-wready','All products available'],
+      ['leg-wpartial','Some products excluded'],
+      ['leg-wnone','No products'],
+      ['hatched','No products (either carrier)']
+    ];
+  }
+  leg.innerHTML = items.map(([cls,lbl])=>{
+    const dotClass = cls==='hatched' ? 'legend-dot hatched' : `legend-dot ${cls}`;
+    return `<div class="legend-item"><div class="${dotClass}"></div>${lbl}</div>`;
+  }).join('');
 }
 
 function buildMetrics(){
-  const pa=Object.values(STATES).filter(s=>s.pru==='approved').length;
-  const pn=Object.values(STATES).filter(s=>s.pru==='notavail').length;
-  const wr=Object.values(STATES).filter(s=>s.web==='ready').length;
-  const wl=Object.values(STATES).filter(s=>['limited','notready','novis'].includes(s.web)).length;
+  const pa = Object.values(STATES).filter(s=>s.pru==='approved').length;
+  const pn = Object.values(STATES).filter(s=>s.pru==='notavail').length;
+  const wf = Object.values(STATES).filter(s=>s.web==='ready').length;
+  const wr = Object.values(STATES).filter(s=>webIsRestricted(s)).length;
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Prudential approved</div><div class="metric-value green">${pa}</div></div>
     <div class="metric"><div class="metric-label">Prudential not available</div><div class="metric-value red">${pn}</div></div>
-    <div class="metric"><div class="metric-label">Websurance available</div><div class="metric-value blue">${wr}</div></div>
-    <div class="metric"><div class="metric-label">Websurance limited/pending</div><div class="metric-value amber">${wl}</div></div>`;
+    <div class="metric"><div class="metric-label">Websurance full coverage</div><div class="metric-value blue">${wf}</div></div>
+    <div class="metric"><div class="metric-label">Websurance with restrictions</div><div class="metric-value amber">${wr}</div></div>`;
 }
 
 function setView(v,btn){
   currentView=v;
   document.querySelectorAll('.controls .filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('map-label').innerHTML=
+  document.getElementById('map-label').innerHTML =
     v==='prudential'?'Prudential life &amp; disability — approved states':'Websurance — product availability by state';
   buildMap(); buildLegend();
 }
@@ -302,17 +365,22 @@ function sortTable(key){
 }
 
 function renderTable(){
-  let rows=Object.entries(STATES).map(([abbr,s])=>({abbr,...s}));
-  if(filterKey==='pru-yes') rows=rows.filter(r=>r.pru==='approved');
-  if(filterKey==='pru-no')  rows=rows.filter(r=>r.pru==='notavail');
-  if(filterKey==='web-yes') rows=rows.filter(r=>r.web==='ready');
-  rows.sort((a,b)=>{const av=a[sortKey]||'',bv=b[sortKey]||'';return av<bv?-sortDir:av>bv?sortDir:0;});
-  document.getElementById('tbody').innerHTML=rows.map(r=>`
-    <tr>
-      <td style="font-weight:500">${r.abbr}</td>
-      <td>${r.name}</td>
-      <td>${pruBadge(r.pru)}</td>
-      <td>${webBadge(r.web)}</td>
+  let rows = Object.entries(STATES).map(([abbr,s])=>({abbr,...s}));
+  if(filterKey==='pru-yes')  rows = rows.filter(r=>r.pru==='approved');
+  if(filterKey==='pru-no')   rows = rows.filter(r=>r.pru==='notavail');
+  if(filterKey==='web-full') rows = rows.filter(r=>r.web==='ready');
+  if(filterKey==='web-exc')  rows = rows.filter(r=>webIsRestricted(r));
+  if(filterKey==='both-no')  rows = rows.filter(r=>bothUnavail(r));
+  rows.sort((a,b)=>{
+    const av=a[sortKey]||'', bv=b[sortKey]||'';
+    return av<bv?-sortDir:av>bv?sortDir:0;
+  });
+  document.getElementById('tbody').innerHTML = rows.map(s=>`
+    <tr class="${bothUnavail(s)?'both-row':''}">
+      <td style="font-weight:500">${s.abbr}</td>
+      <td>${s.name}</td>
+      <td>${pruBadge(s.pru)}</td>
+      <td>${webBadge(s)}</td>
     </tr>`).join('');
 }
 
