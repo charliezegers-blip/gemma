@@ -20,10 +20,11 @@
   .metric { background: #f1efe8; border-radius: 8px; padding: 10px 14px; }
   .metric-label { font-size: 10px; color: #5f5e5a; text-transform: uppercase; letter-spacing: 0.06em; }
   .metric-value { font-size: 24px; font-weight: 500; margin-top: 2px; }
-  .metric-value.green { color: #0f6e56; }
-  .metric-value.red   { color: #993c1d; }
-  .metric-value.blue  { color: #185fa5; }
-  .metric-value.amber { color: #854f0b; }
+  .metric-value.green  { color: #0f6e56; }
+  .metric-value.red    { color: #993c1d; }
+  .metric-value.blue   { color: #185fa5; }
+  .metric-value.amber  { color: #854f0b; }
+  .metric-value.purple { color: #533ab7; }
 
   .controls { display: flex; gap: 7px; margin-bottom: 0.75rem; flex-wrap: wrap; align-items: center; }
   .controls-label { font-size: 12px; color: #888780; margin-right: 2px; }
@@ -53,8 +54,6 @@
     position: relative;
   }
   .tile:hover { transform: scale(1.12); z-index: 10; }
-
-  /* Tooltip */
   .tile[title]:hover::after {
     content: attr(title);
     position: absolute;
@@ -66,34 +65,46 @@
     pointer-events: none; z-index: 100; line-height: 1.6;
   }
 
-  /* Prudential colors */
-  .tile.approved  { background: #e1f5ee; color: #085041; border-color: #5dcaa5; }
-  .tile.not-avail { background: #faece7; color: #712b13; border-color: #f0997b; }
+  /* Prudential */
+  .tile.approved   { background: #e1f5ee; color: #085041; border-color: #5dcaa5; }
+  .tile.not-avail  { background: #faece7; color: #712b13; border-color: #f0997b; }
 
-  /* Websurance colors */
-  .tile.w-ready   { background: #e6f1fb; color: #0c447c; border-color: #85b7eb; }
-  .tile.w-limited { background: #faeeda; color: #633806; border-color: #ef9f27; }
-  .tile.w-partial { background: #faeeda; color: #633806; border-color: #ef9f27; }
-  .tile.w-none    { background: #fcebeb; color: #791f1f; border-color: #f09595; }
+  /* Websurance */
+  .tile.w-ready    { background: #e6f1fb; color: #0c447c; border-color: #85b7eb; }
+  .tile.w-partial  { background: #faeeda; color: #633806; border-color: #ef9f27; }
+  .tile.w-none     { background: #fcebeb; color: #791f1f; border-color: #f09595; }
 
-  /* Both unavailable: diagonal hatch overlay on top of whatever base color */
+  /* TPA */
+  .tile.tpa-yes    { background: #eeedfe; color: #3c3489; border-color: #7f77dd; }
+  .tile.tpa-no     { background: #f1efe8; color: #888780; border-color: #d3d1c7; }
+
+  /* Both unavailable hatch */
   .tile.both-unavail {
     background-image: repeating-linear-gradient(
-      -45deg,
-      transparent 0px,
-      transparent 5px,
-      rgba(0,0,0,0.13) 5px,
-      rgba(0,0,0,0.13) 6px
+      -45deg, transparent 0px, transparent 5px,
+      rgba(0,0,0,0.13) 5px, rgba(0,0,0,0.13) 6px
     );
+  }
+
+  /* TPA dot indicator — shown on Prudential and Websurance views */
+  .tile .tpa-dot {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #7f77dd;
+    border: 1px solid #fff;
   }
 
   .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 0.75rem 0 0; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5f5e5a; }
   .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-dot.round { border-radius: 50%; }
   .legend-dot.hatched {
     background-color: #f0997b;
     background-image: repeating-linear-gradient(
-      -45deg, transparent 0px, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 3px
+      -45deg, transparent 0px, transparent 2px,
+      rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 3px
     );
     border: 0.5px solid #f0997b;
   }
@@ -102,6 +113,9 @@
   .leg-wready    { background: #85b7eb; }
   .leg-wpartial  { background: #ef9f27; }
   .leg-wnone     { background: #f09595; }
+  .leg-tpa-yes   { background: #7f77dd; }
+  .leg-tpa-no    { background: #d3d1c7; }
+  .leg-tpa-dot   { background: #7f77dd; border: 1px solid #ccc; }
 
   hr.divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.1); margin: 1.25rem 0; }
 
@@ -121,10 +135,12 @@
   .b-wready    { background: #e6f1fb; color: #0c447c; }
   .b-wpartial  { background: #faeeda; color: #633806; }
   .b-wnone     { background: #fcebeb; color: #791f1f; }
+  .b-tpa-yes   { background: #eeedfe; color: #3c3489; }
+  .b-tpa-no    { background: #f1efe8; color: #888780; }
 
   .both-pill { display: inline-block; font-size: 9px; font-weight: 500; padding: 2px 6px; border-radius: 8px; background: #1a1a18; color: #fff; margin-left: 5px; vertical-align: middle; letter-spacing: 0.03em; }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     .metrics { grid-template-columns: repeat(2, 1fr); }
   }
   @media print {
@@ -139,8 +155,8 @@
 
   <div class="page-header">
     <h1>Product availability by state</h1>
-    <p>Cakewalk Benefits — geographic eligibility for Prudential (life &amp; disability) and Websurance products</p>
-    <p class="note">Websurance list reflects exclusions only; unlisted states are fully available &nbsp;·&nbsp; Hatched states have no products available from either carrier</p>
+    <p>Cakewalk Benefits — Prudential, Websurance, and TPA license coverage</p>
+    <p class="note">Websurance list reflects exclusions only; unlisted states are fully available &nbsp;·&nbsp; Purple dot on Prudential/Websurance views indicates active TPA license &nbsp;·&nbsp; Hatched = no products from either carrier</p>
   </div>
 
   <div class="card">
@@ -152,6 +168,7 @@
       <span class="controls-label">Show:</span>
       <button class="filter-btn active" onclick="setView('prudential',this)">Prudential</button>
       <button class="filter-btn" onclick="setView('websurance',this)">Websurance</button>
+      <button class="filter-btn" onclick="setView('tpa',this)">TPA license</button>
     </div>
     <div class="section-label" id="map-label">Prudential life &amp; disability — approved states</div>
     <div class="map-wrap"><div class="state-grid" id="map"></div></div>
@@ -163,9 +180,9 @@
       <span class="controls-label">Filter:</span>
       <button class="filter-btn active" id="f-all"      onclick="filterTable('all')">All states</button>
       <button class="filter-btn"        id="f-pru-yes"  onclick="filterTable('pru-yes')">Prudential approved</button>
-      <button class="filter-btn"        id="f-pru-no"   onclick="filterTable('pru-no')">Prudential not available</button>
-      <button class="filter-btn"        id="f-web-full" onclick="filterTable('web-full')">Websurance full coverage</button>
       <button class="filter-btn"        id="f-web-exc"  onclick="filterTable('web-exc')">Websurance restrictions</button>
+      <button class="filter-btn"        id="f-tpa-yes"  onclick="filterTable('tpa-yes')">TPA licensed</button>
+      <button class="filter-btn"        id="f-tpa-no"   onclick="filterTable('tpa-no')">No TPA license</button>
       <button class="filter-btn"        id="f-both-no"  onclick="filterTable('both-no')">Neither carrier</button>
     </div>
     <hr class="divider">
@@ -174,8 +191,9 @@
         <thead><tr>
           <th onclick="sortTable('abbr')">State ↕</th>
           <th onclick="sortTable('name')">Name ↕</th>
-          <th onclick="sortTable('pru')">Prudential (life &amp; disability) ↕</th>
+          <th onclick="sortTable('pru')">Prudential ↕</th>
           <th onclick="sortTable('web')">Websurance ↕</th>
+          <th onclick="sortTable('tpa')">TPA license ↕</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -184,14 +202,10 @@
 
 </div>
 <script>
-// Websurance restrictions only. All other states = all products available.
-// web values:
-//   ready        → all products available
-//   none         → no products (NM, SD)
-//   limited      → Life & AD&D only (NH, OR)
-//   no_ci_hi     → no CI, no HI (TX)
-//   no_vis_etc   → no Vision, AX, CI, or HI (UT)
-//   no_ci        → no CI (WA)
+const TPA_STATES = new Set([
+  'AZ','AR','CA','DE','ID','IL','KS','KY','MS','MT','NM','ND','OH',
+  'RI','SD','TN','UT','VT','WA','WI','AL','CO','MI','NY','VA','DC'
+]);
 
 const STATES = {
   AL:{name:'Alabama',              pru:'approved', web:'ready'},
@@ -247,6 +261,9 @@ const STATES = {
   WY:{name:'Wyoming',              pru:'notavail', web:'ready'}
 };
 
+// Stamp TPA field onto each state
+Object.keys(STATES).forEach(k => { STATES[k].tpa = TPA_STATES.has(k) ? 'yes' : 'no'; });
+
 const LAYOUT = [
   ['AK',1,1],['ME',1,12],
   ['VT',2,11],['NH',2,12],
@@ -263,125 +280,150 @@ const WEB_LABELS = {
   ready:       'All products available',
   limited:     'Life & AD\u00B6D only',
   none:        'No products',
-  no_ci_hi:   'No CI or HI',
-  no_vis_etc: 'No Vision, AX, CI, or HI',
+  no_ci_hi:    'No CI or HI',
+  no_vis_etc:  'No Vision, AX, CI, or HI',
   no_ci:       'No CI'
 };
 
 function bothUnavail(s){ return s.pru==='notavail' && s.web==='none'; }
-function webIsRestricted(s){ return s.web!=='ready'; }
-
-function pruClass(v){ return v==='approved'?'approved':'not-avail'; }
-function webClass(v){ return v==='ready'?'w-ready': v==='none'?'w-none':'w-partial'; }
-
-function pruBadge(v){ return `<span class="badge ${v==='approved'?'b-approved':'b-notavail'}">${PRU_LABELS[v]}</span>`; }
-function webBadge(s){
-  const cls = s.web==='ready'?'b-wready': s.web==='none'?'b-wnone':'b-wpartial';
-  let html = `<span class="badge ${cls}">${WEB_LABELS[s.web]}</span>`;
-  if(bothUnavail(s)) html += `<span class="both-pill">neither carrier</span>`;
-  return html;
-}
+function webIsRestricted(s){ return s.web !== 'ready'; }
+function pruClass(v){ return v==='approved' ? 'approved' : 'not-avail'; }
+function webClass(v){ return v==='ready' ? 'w-ready' : v==='none' ? 'w-none' : 'w-partial'; }
 
 let currentView='prudential', sortKey='name', sortDir=1, filterKey='all';
 
 function buildMap(){
-  const map=document.getElementById('map');
-  map.innerHTML='';
-  LAYOUT.forEach(([abbr,r,c])=>{
-    const s=STATES[abbr];
-    const div=document.createElement('div');
-    div.className='tile';
-    div.style.gridRow=r; div.style.gridColumn=c;
+  const map = document.getElementById('map');
+  map.innerHTML = '';
+  LAYOUT.forEach(([abbr,r,c]) => {
+    const s = STATES[abbr];
+    const div = document.createElement('div');
+    div.className = 'tile';
+    div.style.gridRow = r;
+    div.style.gridColumn = c;
 
-    const pruLabel = PRU_LABELS[s.pru];
-    const webLabel = WEB_LABELS[s.web];
-    div.title=`${s.name}\nPrudential: ${pruLabel}\nWebsurance: ${webLabel}`;
+    const tpaLine = s.tpa==='yes' ? '\nTPA license: Yes' : '\nTPA license: No';
+    div.title = `${s.name}\nPrudential: ${PRU_LABELS[s.pru]}\nWebsurance: ${WEB_LABELS[s.web]}${tpaLine}`;
 
-    if(currentView==='prudential'){
+    if(currentView === 'prudential'){
       div.classList.add(pruClass(s.pru));
-    } else {
+      if(bothUnavail(s)) div.classList.add('both-unavail');
+      if(s.tpa === 'yes'){
+        const dot = document.createElement('div');
+        dot.className = 'tpa-dot';
+        div.appendChild(dot);
+      }
+    } else if(currentView === 'websurance'){
       div.classList.add(webClass(s.web));
+      if(bothUnavail(s)) div.classList.add('both-unavail');
+      if(s.tpa === 'yes'){
+        const dot = document.createElement('div');
+        dot.className = 'tpa-dot';
+        div.appendChild(dot);
+      }
+    } else {
+      // TPA view
+      div.classList.add(s.tpa === 'yes' ? 'tpa-yes' : 'tpa-no');
     }
-    if(bothUnavail(s)) div.classList.add('both-unavail');
-    div.textContent=abbr;
+
+    div.appendChild(document.createTextNode(abbr));
     map.appendChild(div);
   });
 }
 
 function buildLegend(){
-  const leg=document.getElementById('legend');
+  const leg = document.getElementById('legend');
   let items;
-  if(currentView==='prudential'){
+  if(currentView === 'prudential'){
     items = [
       ['leg-approved','Approved'],
       ['leg-notavail','Not available'],
-      ['hatched','Not available (either carrier)']
+      ['hatched','Not available (either carrier)'],
+      ['leg-tpa-dot round','Purple dot = TPA licensed']
     ];
-  } else {
+  } else if(currentView === 'websurance'){
     items = [
       ['leg-wready','All products available'],
       ['leg-wpartial','Some products excluded'],
       ['leg-wnone','No products'],
-      ['hatched','No products (either carrier)']
+      ['hatched','No products (either carrier)'],
+      ['leg-tpa-dot round','Purple dot = TPA licensed']
+    ];
+  } else {
+    items = [
+      ['leg-tpa-yes','TPA license active'],
+      ['leg-tpa-no','No TPA license']
     ];
   }
-  leg.innerHTML = items.map(([cls,lbl])=>{
-    const dotClass = cls==='hatched' ? 'legend-dot hatched' : `legend-dot ${cls}`;
+  leg.innerHTML = items.map(([cls,lbl]) => {
+    const isHatch = cls.startsWith('hatched');
+    const isRound = cls.includes('round');
+    const baseClass = cls.split(' ')[0];
+    const dotClass = isHatch ? 'legend-dot hatched' : isRound ? `legend-dot round ${baseClass}` : `legend-dot ${baseClass}`;
     return `<div class="legend-item"><div class="${dotClass}"></div>${lbl}</div>`;
   }).join('');
 }
 
 function buildMetrics(){
-  const pa = Object.values(STATES).filter(s=>s.pru==='approved').length;
-  const pn = Object.values(STATES).filter(s=>s.pru==='notavail').length;
-  const wf = Object.values(STATES).filter(s=>s.web==='ready').length;
-  const wr = Object.values(STATES).filter(s=>webIsRestricted(s)).length;
+  const pa  = Object.values(STATES).filter(s=>s.pru==='approved').length;
+  const wf  = Object.values(STATES).filter(s=>s.web==='ready').length;
+  const tpa = Object.values(STATES).filter(s=>s.tpa==='yes').length;
+  const all3= Object.values(STATES).filter(s=>s.pru==='approved' && s.web==='ready' && s.tpa==='yes').length;
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Prudential approved</div><div class="metric-value green">${pa}</div></div>
-    <div class="metric"><div class="metric-label">Prudential not available</div><div class="metric-value red">${pn}</div></div>
     <div class="metric"><div class="metric-label">Websurance full coverage</div><div class="metric-value blue">${wf}</div></div>
-    <div class="metric"><div class="metric-label">Websurance with restrictions</div><div class="metric-value amber">${wr}</div></div>`;
+    <div class="metric"><div class="metric-label">TPA licensed states</div><div class="metric-value purple">${tpa}</div></div>
+    <div class="metric"><div class="metric-label">All three active</div><div class="metric-value green">${all3}</div></div>`;
 }
 
-function setView(v,btn){
-  currentView=v;
+function setView(v, btn){
+  currentView = v;
   document.querySelectorAll('.controls .filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('map-label').innerHTML =
-    v==='prudential'?'Prudential life &amp; disability — approved states':'Websurance — product availability by state';
+  const labels = {
+    prudential: 'Prudential life &amp; disability — approved states',
+    websurance: 'Websurance — product availability by state',
+    tpa:        'TPA license — active states'
+  };
+  document.getElementById('map-label').innerHTML = labels[v];
   buildMap(); buildLegend();
 }
 
 function filterTable(key){
-  filterKey=key;
+  filterKey = key;
   document.querySelectorAll('[id^="f-"]').forEach(b=>b.classList.remove('active'));
   document.getElementById('f-'+key).classList.add('active');
   renderTable();
 }
 
 function sortTable(key){
-  if(sortKey===key) sortDir*=-1; else{sortKey=key;sortDir=1;}
+  if(sortKey===key) sortDir*=-1; else{ sortKey=key; sortDir=1; }
   renderTable();
 }
 
 function renderTable(){
   let rows = Object.entries(STATES).map(([abbr,s])=>({abbr,...s}));
   if(filterKey==='pru-yes')  rows = rows.filter(r=>r.pru==='approved');
-  if(filterKey==='pru-no')   rows = rows.filter(r=>r.pru==='notavail');
-  if(filterKey==='web-full') rows = rows.filter(r=>r.web==='ready');
   if(filterKey==='web-exc')  rows = rows.filter(r=>webIsRestricted(r));
+  if(filterKey==='tpa-yes')  rows = rows.filter(r=>r.tpa==='yes');
+  if(filterKey==='tpa-no')   rows = rows.filter(r=>r.tpa==='no');
   if(filterKey==='both-no')  rows = rows.filter(r=>bothUnavail(r));
   rows.sort((a,b)=>{
     const av=a[sortKey]||'', bv=b[sortKey]||'';
     return av<bv?-sortDir:av>bv?sortDir:0;
   });
-  document.getElementById('tbody').innerHTML = rows.map(s=>`
-    <tr class="${bothUnavail(s)?'both-row':''}">
+  document.getElementById('tbody').innerHTML = rows.map(s => {
+    const webCls = s.web==='ready'?'b-wready': s.web==='none'?'b-wnone':'b-wpartial';
+    let webCell = `<span class="badge ${webCls}">${WEB_LABELS[s.web]}</span>`;
+    if(bothUnavail(s)) webCell += `<span class="both-pill">neither carrier</span>`;
+    return `<tr class="${bothUnavail(s)?'both-row':''}">
       <td style="font-weight:500">${s.abbr}</td>
       <td>${s.name}</td>
-      <td>${pruBadge(s.pru)}</td>
-      <td>${webBadge(s)}</td>
-    </tr>`).join('');
+      <td><span class="badge ${s.pru==='approved'?'b-approved':'b-notavail'}">${PRU_LABELS[s.pru]}</span></td>
+      <td>${webCell}</td>
+      <td><span class="badge ${s.tpa==='yes'?'b-tpa-yes':'b-tpa-no'}">${s.tpa==='yes'?'Licensed':'Not licensed'}</span></td>
+    </tr>`;
+  }).join('');
 }
 
 buildMetrics(); buildMap(); buildLegend(); renderTable();
