@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Census Rating Analyzer — Composite vs Age-Banded</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f3;
+    --bg-tertiary: #eeede9;
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6b67;
+    --text-tertiary: #9b9b96;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.22);
+    --accent: #1D9E75;
+    --accent-light: #e1f5ee;
+    --accent-text: #0f6e56;
+    --warning: #EF9F27;
+    --warning-light: #faeeda;
+    --warning-text: #854f0b;
+    --danger: #E24B4A;
+    --danger-light: #fcebeb;
+    --danger-text: #a32d2d;
+    --info: #378ADD;
+    --info-light: #e6f1fb;
+    --info-text: #185fa5;
+    --purple: #7F77DD;
+    --purple-light: #eeedfe;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg-secondary: #252523;
+      --bg-tertiary: #2e2e2b;
+      --text-primary: #f0efea;
+      --text-secondary: #9b9b96;
+      --text-tertiary: #6b6b67;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.2);
+      --accent-light: #04342c;
+      --accent-text: #5dcaa5;
+      --warning-light: #412402;
+      --warning-text: #fac775;
+      --danger-light: #501313;
+      --danger-text: #f09595;
+      --info-light: #042c53;
+      --info-text: #85b7eb;
+      --purple-light: #26215c;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .page-header {
+    max-width: 860px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .card-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 1.25rem 0;
+  }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+    flex: 1;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    background: var(--bg-secondary);
+    border-color: var(--accent);
+  }
+
+  .drop-zone input[type=file] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-icon {
+    font-size: 28px;
+    color: var(--text-tertiary);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .drop-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .drop-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .upload-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .upload-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    min-width: 160px;
+  }
+
+  /* Column pills */
+  .col-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border);
+    color: var(--text-secondary);
+  }
+
+  .pill.accepted {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    padding: 7px 14px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.12s, transform 0.08s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+
+  .btn:hover { background: var(--bg-secondary); }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-sm { font-size: 12px; padding: 5px 11px; }
+
+  .btn-primary {
+    border-color: var(--info);
+    color: var(--info-text);
+    background: var(--info-light);
+  }
+  .btn-primary:hover { filter: brightness(0.96); }
+
+  .btn-danger {
+    border-color: var(--danger);
+    color: var(--danger-text);
+    background: var(--danger-light);
+  }
+
+  /* Roster controls */
+  .roster-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 0.5px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 6px 10px;
+    border-bottom: 0.5px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr.empty-row td {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    font-size: 13px;
+  }
+
+  input[type=text], input[type=number] {
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+
+  input[type=text]:focus, input[type=number]:focus, select:focus {
+    outline: none;
+    border-color: var(--info);
+    box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
+  }
+
+  select {
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .row-del {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.12s;
+  }
+
+  .row-del:hover { color: var(--danger); }
+
+  /* Plan params */
+  .params-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .param-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .base-rate-input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .base-rate-input span {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* Metrics */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+
+  .metric {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 0.875rem 1rem;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .metric-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .metric-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .metric-sub.positive { color: var(--accent-text); }
+  .metric-sub.negative { color: var(--danger-text); }
+
+  /* Charts */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 560px) {
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+
+  .chart-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 180px;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Recommendation box */
+  .rec-box {
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    border: 0.5px solid var(--border);
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    transition: border-color 0.3s;
+  }
+
+  .rec-main { flex: 1; min-width: 200px; }
+
+  .rec-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .rec-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .rec-detail {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  /* Signal scores */
+  .signals { min-width: 180px; }
+
+  .signal-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .signal-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .signal-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .signal-name {
+    font-size: 12px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .signal-pts {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .signal-note {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .score-bar-bg {
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .score-bar-fill {
+    height: 6px;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  /* Warnings */
+  .parse-warnings {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--warning-text);
+    background: var(--warning-light);
+    border: 0.5px solid var(--warning);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    line-height: 1.7;
+    display: none;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; }
+
+  /* Results section hidden initially */
+  #resultsSection { display: none; }
+
+  /* Responsive tweaks */
+  @media (max-width: 480px) {
+    .upload-actions { flex-direction: row; flex-wrap: wrap; }
+    .rec-box { flex-direction: column; }
+    body { padding: 1rem 0.5rem; }
+    .card { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Census Rating Analyzer</h1>
+  <p>Compare composite vs age-banded group health insurance pricing</p>
+</div>
+
+<div id="toastEl" class="toast"></div>
+
+<!-- CSV UPLOAD -->
+<div class="card">
+  <div class="card-title">Upload census CSV</div>
+  <div class="col-pills">
+    <span class="pill accepted"><i class="ti ti-check" style="font-size:11px"></i>age</span>
+    <span class="pill accepted"><i class="ti ti-check" style="font-size:11px"></i>dob</span>
+    <span class="pill accepted"><i class="ti ti-check" style="font-size:11px"></i>tier / coverage</span>
+    <span class="pill">name</span>
+    <span class="pill">salary</span>
+    <span style="font-size:12px;color:var(--text-tertiary);align-self:center;margin-left:4px">— header row required</span>
+  </div>
+  <div class="upload-row">
+    <div class="drop-zone" id="dropZone">
+      <input type="file" accept=".csv,.txt" id="csvInput" onchange="handleFile(this.files[0])">
+      <i class="ti ti-upload drop-icon"></i>
+      <div class="drop-title">Drop CSV here or click to browse</div>
+      <div class="drop-sub" id="fileLabel">No file selected</div>
+    </div>
+    <div class="upload-actions">
+      <button class="btn btn-sm" onclick="downloadTemplate()">
+        <i class="ti ti-download"></i> Download template
+      </button>
+      <button class="btn btn-sm" onclick="loadSample()">
+        <i class="ti ti-table"></i> Load sample data
+      </button>
+    </div>
+  </div>
+  <div class="parse-warnings" id="parseWarnings"></div>
+</div>
+
+<!-- EMPLOYEE ROSTER -->
+<div class="card">
+  <div class="roster-header">
+    <div>
+      <div class="card-title">Employee roster</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-top:2px" id="rosterCount">0 employees</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sm btn-danger" onclick="clearAll()" id="clearBtn" style="display:none">
+        <i class="ti ti-trash"></i> Clear all
+      </button>
+      <button class="btn btn-sm btn-primary" onclick="addRow()">
+        <i class="ti ti-plus"></i> Add employee
+      </button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name (opt.)</th>
+          <th>Age</th>
+          <th>Coverage tier</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="censusBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PLAN PARAMETERS -->
+<div class="card">
+  <div class="card-title">Plan parameters</div>
+  <div style="height:8px"></div>
+  <div class="params-grid">
+    <div>
+      <label class="param-label">Base monthly rate (EE-only, age 21–25)</label>
+      <div class="base-rate-input">
+        <span>$</span>
+        <input type="number" id="baseRate" value="280" min="50" max="2000"
+          style="width:100px;font-size:15px;padding:6px 10px" oninput="recalc()">
+      </div>
+    </div>
+    <div>
+      <label class="param-label">Employer situs state</label>
+      <select id="stateSelect" onchange="recalc()" style="width:100%">
+        <option value="standard">Standard (3:1 band ratio)</option>
+        <option value="5to1">5:1 band ratio</option>
+        <option value="community">Community rated (NY / NJ / VT)</option>
+      </select>
+    </div>
+    <div>
+      <label class="param-label">Min. group size for composite</label>
+      <select id="minGroup" onchange="recalc()" style="width:100%">
+        <option value="10">10 enrolled</option>
+        <option value="25" selected>25 enrolled</option>
+        <option value="50">50 enrolled</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="card" id="resultsSection">
+  <div class="card-title" style="margin-bottom:1rem">Results</div>
+
+  <div class="metrics-grid" id="metricCards"></div>
+
+  <hr class="section-divider">
+
+  <div class="charts-grid">
+    <div>
+      <div class="chart-label">Age distribution</div>
+      <div class="chart-wrap">
+        <canvas id="ageChart" role="img" aria-label="Bar chart showing age distribution of enrolled employees"></canvas>
+      </div>
+    </div>
+    <div>
+      <div class="chart-label">Premium comparison per member</div>
+      <div class="chart-wrap">
+        <canvas id="premChart" role="img" aria-label="Bar chart comparing age-banded vs composite premiums per employee"></canvas>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:#7F77DD"></div>Age-banded</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#1D9E75"></div>Composite</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="rec-box" id="recBox">
+    <div class="rec-main">
+      <div class="rec-eyebrow">Recommendation</div>
+      <div class="rec-title" id="recTitle"></div>
+      <div class="rec-detail" id="recDetail"></div>
+    </div>
+    <div class="signals">
+      <div class="signal-eyebrow">Signal scores</div>
+      <div class="signal-list" id="signalList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIERS = ['EE only', 'EE + Spouse', 'EE + Child(ren)', 'Family'];
+const TIER_FACTORS = { 'EE only': 1, 'EE + Spouse': 1.86, 'EE + Child(ren)': 1.48, 'Family': 2.1 };
+
+function normalizeTier(raw) {
+  if (!raw) return 'EE only';
+  const s = raw.toLowerCase().replace(/[^a-z0-9+]/g, ' ').trim();
+  if (s.includes('family')) return 'Family';
+  if (s.includes('child')) return 'EE + Child(ren)';
+  if (s.includes('spouse') || s.includes('partner') || s.includes('domestic')) return 'EE + Spouse';
+  if (s.includes('ee') || s.includes('employee') || s.includes('single') || s.includes('only')) return 'EE only';
+  return 'EE only';
+}
+
+function dobToAge(dob) {
+  const d = new Date(dob);
+  if (isNaN(d)) return null;
+  const today = new Date();
+  let age = today.getFullYear() - d.getFullYear();
+  const m = today.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+  return (age >= 18 && age <= 80) ? age : null;
+}
+
+function ageFactor(age, bandType) {
+  if (bandType === 'community') return 1;
+  const bands = bandType === '5to1'
+    ? [[21,25,0.635],[26,30,0.7],[31,35,0.78],[36,40,0.87],[41,45,1.0],[46,50,1.2],[51,55,1.5],[56,60,1.85],[61,65,2.4],[66,999,3.175]]
+    : [[21,25,0.635],[26,30,0.7],[31,35,0.78],[36,40,0.87],[41,45,1.0],[46,50,1.14],[51,55,1.32],[56,60,1.51],[61,65,1.73],[66,999,2.0]];
+  for (const [lo, hi, f] of bands) if (age >= lo && age <= hi) return f;
+  return 1;
+}
+
+let employees = [];
+let nextId = 1;
+let ageChart = null, premChart = null;
+
+function toast(msg) {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+function addRow(name = '', age = '', tier = 'EE only') {
+  const id = nextId++;
+  employees.push({ id, name, age, tier });
+  renderTable();
+  recalc();
+}
+
+function removeRow(id) {
+  employees = employees.filter(e => e.id !== id);
+  renderTable();
+  recalc();
+}
+
+function clearAll() {
+  employees = []; nextId = 1;
+  renderTable(); recalc();
+  document.getElementById('fileLabel').textContent = 'No file selected';
+  document.getElementById('parseWarnings').style.display = 'none';
+  document.getElementById('clearBtn').style.display = 'none';
+}
+
+function updateField(id, field, val) {
+  const emp = employees.find(e => e.id === id);
+  if (emp) emp[field] = field === 'age' ? (val === '' ? '' : parseInt(val)) : val;
+  recalc();
+}
+
+function renderTable() {
+  const n = employees.length;
+  document.getElementById('rosterCount').textContent = n + ' employee' + (n !== 1 ? 's' : '');
+  document.getElementById('clearBtn').style.display = n > 0 ? '' : 'none';
+  const body = document.getElementById('censusBody');
+  if (n === 0) {
+    body.innerHTML = '<tr class="empty-row"><td colspan="5">No employees yet — add one above or upload a CSV</td></tr>';
+    return;
+  }
+  body.innerHTML = employees.map((emp, i) => `
+    <tr>
+      <td style="color:var(--text-tertiary);width:32px">${i + 1}</td>
+      <td><input type="text" value="${emp.name || ''}" placeholder="optional"
+        style="width:120px" oninput="updateField(${emp.id},'name',this.value)"></td>
+      <td><input type="number" value="${emp.age}" min="18" max="80" placeholder="e.g. 34"
+        style="width:72px" oninput="updateField(${emp.id},'age',this.value)"></td>
+      <td><select onchange="updateField(${emp.id},'tier',this.value)">
+        ${TIERS.map(t => `<option${t === emp.tier ? ' selected' : ''}>${t}</option>`).join('')}
+      </select></td>
+      <td style="width:32px"><button class="row-del" onclick="removeRow(${emp.id})" aria-label="remove employee">×</button></td>
+    </tr>`).join('');
+}
+
+// ── CSV parsing ──────────────────────────────────────────────────────────────
+function handleFile(file) {
+  if (!file) return;
+  document.getElementById('fileLabel').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => parseCSV(e.target.result);
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) { toast('CSV must have a header row and at least one data row.'); return; }
+
+  const header = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9]/g, ''));
+  const col = h => header.indexOf(h);
+
+  const ageCol  = ['age','ageyears','empgage'].map(a => col(a)).find(i => i >= 0) ?? -1;
+  const dobCol  = ['dob','dateofbirth','birthdate','birthday'].map(a => col(a)).find(i => i >= 0) ?? -1;
+  const tierCol = ['tier','coverage','coveragetier','coveragetype','plan','election'].map(a => col(a)).find(i => i >= 0) ?? -1;
+  const nameCol = ['name','employeename','fullname','firstname','employee'].map(a => col(a)).find(i => i >= 0) ?? -1;
+
+  if (ageCol < 0 && dobCol < 0) {
+    toast('Could not find an age or date-of-birth column. Please check your CSV headers.');
+    return;
+  }
+
+  const warnings = [];
+  const parsed = [];
+  let skipped = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const cells = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+    const rawAge  = ageCol  >= 0 ? cells[ageCol]  : null;
+    const rawDob  = dobCol  >= 0 ? cells[dobCol]  : null;
+    const rawTier = tierCol >= 0 ? cells[tierCol] : null;
+    const rawName = nameCol >= 0 ? cells[nameCol] : null;
+
+    let age = null;
+    if (rawAge && rawAge !== '') age = parseInt(rawAge);
+    else if (rawDob) age = dobToAge(rawDob);
+
+    if (age === null || isNaN(age) || age < 18 || age > 80) {
+      skipped++;
+      warnings.push(`Row ${i + 1}: skipped — age "${rawAge || rawDob}" is missing or out of range (18–80).`);
+      continue;
+    }
+
+    parsed.push({ id: nextId++, name: rawName || '', age, tier: normalizeTier(rawTier) });
+  }
+
+  if (parsed.length === 0) { toast('No valid employees found in CSV. Check the format and try again.'); return; }
+
+  employees = parsed;
+  renderTable();
+  recalc();
+
+  const warnEl = document.getElementById('parseWarnings');
+  if (warnings.length > 0) {
+    warnEl.style.display = 'block';
+    warnEl.innerHTML = '<strong>Parse warnings:</strong><br>' + warnings.slice(0, 5).join('<br>') + (warnings.length > 5 ? `<br>…and ${warnings.length - 5} more` : '');
+  } else {
+    warnEl.style.display = 'none';
+  }
+
+  if (skipped > 0) toast(`Loaded ${parsed.length} employees. ${skipped} row(s) skipped — see warnings.`);
+  else toast(`Loaded ${parsed.length} employees successfully.`);
+}
+
+// Drag and drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) { document.getElementById('fileLabel').textContent = f.name; handleFile(f); }
+});
+
+function downloadTemplate() {
+  const rows = [
+    'name,age,dob,tier',
+    'Jane Smith,34,,EE + Spouse',
+    'Bob Jones,,1978-06-15,Family',
+    'Maria Garcia,28,,EE only',
+    'Tom Chen,51,,EE + Child(ren)'
+  ];
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'census_template.csv';
+  a.click();
+}
+
+function loadSample() {
+  employees = []; nextId = 1;
+  const s = [
+    ['Alice M.',28,'EE only'],['Brian T.',32,'EE + Spouse'],['Carla N.',41,'Family'],
+    ['David P.',55,'Family'],['Eva L.',29,'EE only'],['Frank R.',48,'EE + Spouse'],
+    ['Grace K.',62,'Family'],['Hiro S.',35,'EE only'],['Iris W.',50,'EE + Child(ren)'],
+    ['Jake O.',44,'Family'],['Karen B.',38,'EE only'],['Liam C.',57,'EE + Spouse'],
+    ['Maya D.',31,'EE only'],['Noah E.',46,'Family'],['Olivia F.',24,'EE only'],
+    ['Pete G.',53,'EE + Spouse'],['Quinn H.',39,'Family'],['Rachel I.',67,'Family'],
+    ['Sam J.',33,'EE only'],['Tina K.',42,'EE + Child(ren)'],['Uri L.',26,'EE only'],
+    ['Vera M.',59,'EE + Spouse'],['Will N.',36,'Family'],['Xena O.',49,'EE only'],
+    ['Yara P.',43,'EE + Spouse']
+  ];
+  s.forEach(([name, age, tier]) => employees.push({ id: nextId++, name, age, tier }));
+  document.getElementById('fileLabel').textContent = 'No file selected';
+  document.getElementById('parseWarnings').style.display = 'none';
+  renderTable();
+  recalc();
+}
+
+// ── Rating engine ────────────────────────────────────────────────────────────
+function recalc() {
+  const valid = employees
+    .filter(e => e.age !== '' && Number.isFinite(parseInt(e.age)) && parseInt(e.age) >= 18 && parseInt(e.age) <= 80)
+    .map(e => ({ ...e, age: parseInt(e.age) }));
+
+  if (valid.length < 2) { document.getElementById('resultsSection').style.display = 'none'; return; }
+
+  const base = parseFloat(document.getElementById('baseRate').value) || 280;
+  const band = document.getElementById('stateSelect').value;
+  const minG = parseInt(document.getElementById('minGroup').value);
+  const n = valid.length;
+
+  const ages = valid.map(e => e.age);
+  const meanAge = ages.reduce((a, b) => a + b, 0) / n;
+  const variance = ages.reduce((s, a) => s + (a - meanAge) ** 2, 0) / n;
+  const stdDev = Math.sqrt(variance);
+  const spread = Math.max(...ages) - Math.min(...ages);
+
+  const abPrem = valid.map(e => base * ageFactor(e.age, band) * TIER_FACTORS[e.tier]);
+  const totalAB = abPrem.reduce((a, b) => a + b, 0);
+  const avgFactor = valid.reduce((s, e) => s + ageFactor(e.age, band) * TIER_FACTORS[e.tier], 0) / n;
+  const compRate = base * avgFactor;
+  const compPrem = valid.map(e => compRate * TIER_FACTORS[e.tier]);
+  const totalComp = compPrem.reduce((a, b) => a + b, 0);
+  const saving = totalAB - totalComp;
+  const savingPct = saving / totalAB * 100;
+
+  let score = 0;
+  const signals = [];
+
+  if (band === 'community') {
+    signals.push({ label: 'Community rated state', note: 'Composite not applicable', pts: 0, max: 0, skip: true });
+  } else {
+    const s1 = n >= minG ? 2 : (n >= minG * 0.8 ? 1 : 0);
+    signals.push({ label: 'Group size', note: `${n} enrolled, min ${minG}`, pts: s1, max: 2 }); score += s1;
+    const s2 = meanAge > 45 ? 2 : meanAge > 40 ? 1 : 0;
+    signals.push({ label: 'Mean age', note: `${meanAge.toFixed(1)} yrs`, pts: s2, max: 2 }); score += s2;
+    const s3 = stdDev > 10 ? 2 : stdDev > 7 ? 1 : 0;
+    signals.push({ label: 'Age dispersion', note: `σ = ${stdDev.toFixed(1)} yrs`, pts: s3, max: 2 }); score += s3;
+    const s4 = spread > 20 ? 1 : 0;
+    signals.push({ label: 'Age spread', note: `${spread} yr range`, pts: s4, max: 1 }); score += s4;
+    const s5 = savingPct > 3 ? 3 : savingPct > 1 ? 2 : savingPct > 0 ? 1 : 0;
+    signals.push({ label: 'Premium math', note: `${saving >= 0 ? '−' : '+'}${Math.abs(savingPct).toFixed(1)}% vs age-banded`, pts: s5, max: 3 }); score += s5;
+  }
+
+  let recTitle, recDetail, recColor;
+  if (band === 'community') {
+    recTitle = 'Community rating — composite not applicable';
+    recDetail = 'This state mandates community rating. No composite recommendation is relevant.';
+    recColor = '#888';
+  } else if (n < minG) {
+    recTitle = 'Group too small for composite';
+    recDetail = `With ${n} enrolled employees, this group doesn't meet the minimum of ${minG} for composite eligibility. Re-evaluate if enrollment grows.`;
+    recColor = '#E24B4A';
+  } else if (score >= 7) {
+    recTitle = 'Strong candidate for composite rating';
+    recDetail = `Score ${score}/10. Age distribution and premium math both favor blended rates — composite pricing would reduce total premium by an estimated $${Math.abs(Math.round(saving)).toLocaleString()}/mo.`;
+    recColor = '#1D9E75';
+  } else if (score >= 4) {
+    recTitle = 'Moderate composite potential — worth quoting';
+    recDetail = `Score ${score}/10. Some characteristics favor composite, but savings may be modest. Request a composite quote alongside age-banded to let the numbers decide.`;
+    recColor = '#EF9F27';
+  } else {
+    recTitle = 'Age-banded likely the better option';
+    recDetail = `Score ${score}/10. This group skews young and uniform — composite averaging would spread costs upward. Recommend staying with age-banded pricing.`;
+    recColor = '#E24B4A';
+  }
+
+  document.getElementById('resultsSection').style.display = 'block';
+  document.getElementById('recTitle').textContent = recTitle;
+  document.getElementById('recDetail').textContent = recDetail;
+  document.getElementById('recBox').style.borderColor = recColor + '88';
+
+  document.getElementById('metricCards').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">Enrolled</div>
+      <div class="metric-value">${n}</div>
+      <div class="metric-sub">employees</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Mean age</div>
+      <div class="metric-value">${meanAge.toFixed(1)}</div>
+      <div class="metric-sub">yrs · σ ${stdDev.toFixed(1)}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Age-banded total</div>
+      <div class="metric-value">$${Math.round(totalAB).toLocaleString()}</div>
+      <div class="metric-sub">per month</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Composite total</div>
+      <div class="metric-value">$${Math.round(totalComp).toLocaleString()}</div>
+      <div class="metric-sub ${saving >= 0 ? 'positive' : 'negative'}">
+        ${saving >= 0 ? '↓ saves' : '↑ costs'} $${Math.abs(Math.round(saving)).toLocaleString()}/mo
+      </div>
+    </div>`;
+
+  document.getElementById('signalList').innerHTML = signals.filter(s => !s.skip).map(s => `
+    <div>
+      <div class="signal-row-header">
+        <span class="signal-name">${s.label}</span>
+        <span class="signal-pts">${s.pts}/${s.max}</span>
+      </div>
+      <div class="signal-note">${s.note}</div>
+      <div class="score-bar-bg">
+        <div class="score-bar-fill" style="width:${s.max > 0 ? Math.round(s.pts / s.max * 100) : 0}%;background:${s.pts === s.max ? '#1D9E75' : s.pts > 0 ? '#EF9F27' : '#E24B4A'}"></div>
+      </div>
+    </div>`).join('');
+
+  drawAgeChart(ages);
+  drawPremChart(valid, abPrem, compPrem);
+}
+
+function drawAgeChart(ages) {
+  const counts = [[18,30],[31,40],[41,50],[51,60],[61,80]].map(([lo,hi]) => ages.filter(a => a >= lo && a <= hi).length);
+  if (ageChart) ageChart.destroy();
+  ageChart = new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: {
+      labels: ['18–30','31–40','41–50','51–60','61+'],
+      datasets: [{ label: 'Employees', data: counts, backgroundColor: '#5DCAA5', borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { stepSize: 1, font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function drawPremChart(valid, abPrem, compPrem) {
+  if (premChart) premChart.destroy();
+  const MAX = 30;
+  const vSlice  = valid.slice(0, MAX);
+  const abSlice = abPrem.slice(0, MAX);
+  const cpSlice = compPrem.slice(0, MAX);
+  premChart = new Chart(document.getElementById('premChart'), {
+    type: 'bar',
+    data: {
+      labels: vSlice.map((e, i) => e.name ? e.name.split(' ')[0] : `Emp ${i + 1}`),
+      datasets: [
+        { label: 'Age-banded', data: abSlice.map(v => Math.round(v)), backgroundColor: '#7F77DD', borderRadius: 3 },
+        { label: 'Composite',  data: cpSlice.map(v => Math.round(v)), backgroundColor: '#1D9E75', borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45, autoSkip: valid.length > 15 } },
+        y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { font: { size: 11 }, callback: v => '$' + v } }
+      }
+    }
+  });
+}
+
+renderTable();
+</script>
+</body>
+</html>
