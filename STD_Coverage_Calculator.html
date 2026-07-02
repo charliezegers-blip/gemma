@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>STD Coverage & Premium Calculator</title>
+<style>
+  :root {
+    --border: #dedad2;
+    --surface-1: #f7f5f0;
+    --surface-2: #ffffff;
+    --text-primary: #1f1e1c;
+    --text-secondary: #6b6a65;
+    --text-muted: #8f8d87;
+    --accent: #185fa5;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px;
+    background: var(--surface-1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--text-primary);
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 28px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .row.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 6px;
+  }
+  input, select {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    background: #fff;
+    color: var(--text-primary);
+  }
+  input:disabled, select:disabled {
+    background: var(--surface-1);
+    color: var(--text-muted);
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(24,95,165,0.15);
+  }
+  .field-prefix {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-prefix span {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .age-band {
+    display: none;
+    margin-bottom: 20px;
+  }
+  .age-band.visible {
+    display: block;
+  }
+  .results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .card {
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .card p.label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0 0 6px;
+  }
+  .card p.value {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 16px;
+    min-height: 18px;
+  }
+  .formula {
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 28px;
+    padding-top: 16px;
+    line-height: 1.6;
+  }
+  @media (max-width: 480px) {
+    .row, .row.three, .results { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>STD coverage & premium calculator</h1>
+  <p class="subtitle">Cakewalk Benefits — Short Term Disability</p>
+
+  <div class="row">
+    <div>
+      <label for="preset">Plan preset</label>
+      <select id="preset">
+        <option value="custom">Custom</option>
+        <option value="taa_1000">Cakewalk (TAA) — STD ($1,000/week cap)</option>
+        <option value="taa_500">Cakewalk (TAA) — STD ($500/week option)</option>
+        <option value="mw_std">Mountain West — STD (age-banded)</option>
+      </select>
+    </div>
+    <div>
+      <label for="income">Annual income</label>
+      <div class="field-prefix"><span>$</span><input type="number" id="income" value="60000" min="0" step="1000" /></div>
+    </div>
+  </div>
+
+  <div class="age-band" id="age-band-wrap">
+    <label for="ageBand">Age band (Mountain West rate table)</label>
+    <select id="ageBand">
+      <option value="0.25" data-label="Less than 30">Less than 30 — $0.250</option>
+      <option value="0.25" data-label="30-34">30–34 — $0.250</option>
+      <option value="0.25" data-label="35-39">35–39 — $0.250</option>
+      <option value="0.25" data-label="40-44">40–44 — $0.250</option>
+      <option value="0.30" data-label="45-49">45–49 — $0.300</option>
+      <option value="0.38" data-label="50-54">50–54 — $0.380</option>
+      <option value="0.46" data-label="55-59">55–59 — $0.460</option>
+      <option value="0.55" data-label="60-64">60–64 — $0.550</option>
+      <option value="0.66" data-label="65+">65+ — $0.660</option>
+    </select>
+  </div>
+
+  <div class="row three">
+    <div>
+      <label for="benefitPct">Benefit percentage</label>
+      <div class="field-prefix"><input type="number" id="benefitPct" value="60" min="0" max="100" step="1" /><span>%</span></div>
+    </div>
+    <div>
+      <label for="rate">Rate per $10 weekly benefit</label>
+      <div class="field-prefix"><span>$</span><input type="number" id="rate" value="0.271" min="0" step="0.001" /></div>
+    </div>
+    <div>
+      <label for="cap">Max weekly benefit</label>
+      <div class="field-prefix"><span>$</span><input type="number" id="cap" value="1000" min="0" step="50" /></div>
+    </div>
+  </div>
+
+  <div class="results">
+    <div class="card">
+      <p class="label">Weekly benefit</p>
+      <p class="value" id="out-weekly">$0</p>
+    </div>
+    <div class="card">
+      <p class="label">Monthly premium</p>
+      <p class="value" id="out-premium">$0</p>
+    </div>
+    <div class="card">
+      <p class="label">Rate per $1,000 weekly benefit</p>
+      <p class="value" id="out-rate1000">$0</p>
+    </div>
+  </div>
+
+  <p class="note" id="cap-note"></p>
+
+  <div class="formula">
+    Weekly benefit = min(annual income &times; benefit % &divide; 52, max weekly benefit)<br/>
+    Monthly premium = (weekly benefit &divide; 10) &times; rate
+  </div>
+</div>
+
+<script>
+  const presets = {
+    custom: null,
+    taa_1000: { rate: 0.271, benefitPct: 60, cap: 1000, ageBanded: false },
+    taa_500: { rate: 0.271, benefitPct: 60, cap: 500, ageBanded: false },
+    mw_std: { rate: 0.25, benefitPct: 60, cap: 1200, ageBanded: true }
+  };
+
+  const el = id => document.getElementById(id);
+  const fmt = n => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  function applyPreset() {
+    const key = el('preset').value;
+    const p = presets[key];
+    const ageWrap = el('age-band-wrap');
+    if (p) {
+      el('rate').value = p.rate;
+      el('benefitPct').value = p.benefitPct;
+      el('cap').value = p.cap;
+      if (p.ageBanded) {
+        ageWrap.classList.add('visible');
+        el('ageBand').selectedIndex = 0;
+        el('rate').value = el('ageBand').value;
+      } else {
+        ageWrap.classList.remove('visible');
+      }
+    } else {
+      ageWrap.classList.remove('visible');
+    }
+    calculate();
+  }
+
+  function applyAgeBand() {
+    el('rate').value = el('ageBand').value;
+    calculate();
+  }
+
+  function calculate() {
+    const income = parseFloat(el('income').value) || 0;
+    const benefitPct = parseFloat(el('benefitPct').value) || 0;
+    const rate = parseFloat(el('rate').value) || 0;
+    const cap = parseFloat(el('cap').value) || 0;
+
+    const uncappedWeekly = (income * (benefitPct / 100)) / 52;
+    const weekly = cap > 0 ? Math.min(uncappedWeekly, cap) : uncappedWeekly;
+    const premium = (weekly / 10) * rate;
+    const rate1000 = weekly > 0 ? (premium / (weekly / 1000)) : 0;
+
+    el('out-weekly').textContent = fmt(weekly);
+    el('out-premium').textContent = fmt(premium);
+    el('out-rate1000').textContent = fmt(rate1000);
+
+    el('cap-note').textContent = (cap > 0 && uncappedWeekly > cap)
+      ? 'Benefit is capped — uncapped calculation would be ' + fmt(uncappedWeekly) + '/week.'
+      : '';
+  }
+
+  el('preset').addEventListener('change', applyPreset);
+  el('ageBand').addEventListener('change', applyAgeBand);
+  ['income','benefitPct','rate','cap'].forEach(id => el(id).addEventListener('input', calculate));
+  calculate();
+</script>
+</body>
+</html>

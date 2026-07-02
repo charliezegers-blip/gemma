@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LTD Coverage & Premium Calculator</title>
+<style>
+  :root {
+    --border: #dedad2;
+    --surface-1: #f7f5f0;
+    --surface-2: #ffffff;
+    --text-primary: #1f1e1c;
+    --text-secondary: #6b6a65;
+    --text-muted: #8f8d87;
+    --accent: #185fa5;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px;
+    background: var(--surface-1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--text-primary);
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 28px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .row.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 6px;
+  }
+  input, select {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    background: #fff;
+    color: var(--text-primary);
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(24,95,165,0.15);
+  }
+  .field-prefix {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-prefix span {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .card {
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .card p.label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0 0 6px;
+  }
+  .card p.value {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 16px;
+    min-height: 18px;
+  }
+  .formula {
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 28px;
+    padding-top: 16px;
+    line-height: 1.6;
+  }
+  .formula code {
+    background: var(--surface-1);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  @media (max-width: 480px) {
+    .row, .row.three, .results { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>LTD coverage & premium calculator</h1>
+  <p class="subtitle">Cakewalk Benefits — Long Term Disability</p>
+
+  <div class="row">
+    <div>
+      <label for="preset">Plan preset</label>
+      <select id="preset">
+        <option value="custom">Custom</option>
+        <option value="taa_staff">Cakewalk (TAA) — LTD staff</option>
+        <option value="taa_agents">Cakewalk (TAA) — LTD agents</option>
+        <option value="mw_staff">Mountain West — LTD staff</option>
+        <option value="mw_agents">Mountain West — LTD agents</option>
+      </select>
+    </div>
+    <div>
+      <label for="income">Annual income</label>
+      <div class="field-prefix"><span>$</span><input type="number" id="income" value="60000" min="0" step="1000" /></div>
+    </div>
+  </div>
+
+  <div class="row three">
+    <div>
+      <label for="benefitPct">Benefit percentage</label>
+      <div class="field-prefix"><input type="number" id="benefitPct" value="60" min="0" max="100" step="1" /><span>%</span></div>
+    </div>
+    <div>
+      <label for="rate">Rate per $100 income</label>
+      <div class="field-prefix"><span>$</span><input type="number" id="rate" value="0.54" min="0" step="0.001" /></div>
+    </div>
+    <div>
+      <label for="cap">Max monthly benefit</label>
+      <div class="field-prefix"><span>$</span><input type="number" id="cap" value="7500" min="0" step="100" /></div>
+    </div>
+  </div>
+
+  <div class="results">
+    <div class="card">
+      <p class="label">Coverage amount (monthly)</p>
+      <p class="value" id="out-coverage">$0</p>
+    </div>
+    <div class="card">
+      <p class="label">Monthly premium</p>
+      <p class="value" id="out-premium">$0</p>
+    </div>
+    <div class="card">
+      <p class="label">Rate per $1,000 coverage</p>
+      <p class="value" id="out-rate1000">$0</p>
+    </div>
+  </div>
+
+  <p class="note" id="cap-note"></p>
+
+  <div class="formula">
+    Coverage amount = min(annual income &times; benefit % &divide; 12, max monthly benefit)<br/>
+    Monthly premium = (annual income &divide; 100) &times; rate &divide; 12
+  </div>
+</div>
+
+<script>
+  const presets = {
+    custom: null,
+    taa_staff: { rate: 0.54, benefitPct: 60, cap: 7500 },
+    taa_agents: { rate: 0.607, benefitPct: 60, cap: 7500 },
+    mw_staff: { rate: 0.34, benefitPct: 60, cap: 2250 },
+    mw_agents: { rate: 0.34, benefitPct: 60, cap: 9000 }
+  };
+
+  const el = id => document.getElementById(id);
+  const fmt = n => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  function applyPreset() {
+    const p = presets[el('preset').value];
+    if (p) {
+      el('rate').value = p.rate;
+      el('benefitPct').value = p.benefitPct;
+      el('cap').value = p.cap;
+    }
+    calculate();
+  }
+
+  function calculate() {
+    const income = parseFloat(el('income').value) || 0;
+    const benefitPct = parseFloat(el('benefitPct').value) || 0;
+    const rate = parseFloat(el('rate').value) || 0;
+    const cap = parseFloat(el('cap').value) || 0;
+
+    const uncappedMonthly = (income * (benefitPct / 100)) / 12;
+    const coverage = cap > 0 ? Math.min(uncappedMonthly, cap) : uncappedMonthly;
+    const premium = (income / 100) * rate / 12;
+    const rate1000 = coverage > 0 ? (premium / (coverage / 1000)) : 0;
+
+    el('out-coverage').textContent = fmt(coverage);
+    el('out-premium').textContent = fmt(premium);
+    el('out-rate1000').textContent = fmt(rate1000);
+
+    el('cap-note').textContent = (cap > 0 && uncappedMonthly > cap)
+      ? 'Benefit is capped — uncapped calculation would be ' + fmt(uncappedMonthly) + '/month.'
+      : '';
+  }
+
+  el('preset').addEventListener('change', applyPreset);
+  ['income','benefitPct','rate','cap'].forEach(id => el(id).addEventListener('input', calculate));
+  calculate();
+</script>
+</body>
+</html>
