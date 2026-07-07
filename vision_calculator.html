@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vision Plan Rate Comparison</title>
+<style>
+  :root{
+    --ink:#1c2b2e;
+    --paper:#f7f5f0;
+    --line:#d8d3c4;
+    --accent:#0f6e5c;
+    --accent-soft:#e4f0ec;
+    --amber:#a9631a;
+    --amber-soft:#f5e9db;
+    --muted:#6b6459;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Georgia',serif;
+    padding:32px 20px 60px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  header{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  h1{
+    font-size:1.7rem;
+    margin:0;
+    letter-spacing:0.01em;
+    font-weight:600;
+  }
+  .kicker{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-transform:uppercase;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .plan-tag{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+  }
+  .panel{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px 24px;
+    margin-bottom:24px;
+  }
+  .panel h2{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--accent);
+    margin:0 0 16px 0;
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:16px;
+  }
+  label{
+    display:block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  input,select{
+    width:100%;
+    padding:9px 10px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.95rem;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  input:focus,select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    background:var(--white);
+  }
+  .hint{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-top:10px;
+    line-height:1.5;
+  }
+  button{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    background:var(--accent);
+    color:var(--white);
+    border:none;
+    padding:11px 22px;
+    border-radius:3px;
+    cursor:pointer;
+    margin-top:18px;
+  }
+  button:hover{background:#0b5747;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.92rem;
+  }
+  th,td{
+    text-align:left;
+    padding:11px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  th{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    color:var(--muted);
+    font-weight:600;
+  }
+  td.rate{
+    font-family:'Iowan Old Style','Georgia',serif;
+    font-size:1.15rem;
+    font-weight:600;
+  }
+  tr.lowest td.rate{color:var(--accent);}
+  tr.lowest{background:var(--accent-soft);}
+  .badge{
+    display:inline-block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.65rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:2px 7px;
+    border-radius:9px;
+    margin-left:8px;
+    vertical-align:middle;
+  }
+  .badge.best{background:var(--accent);color:#fff;}
+  .badge.legacy{background:var(--amber-soft);color:var(--amber);}
+  .note-box{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.8rem;
+    color:var(--muted);
+    background:var(--amber-soft);
+    border-left:3px solid var(--amber);
+    padding:12px 14px;
+    margin-top:18px;
+    line-height:1.55;
+  }
+  .note-box strong{color:var(--ink);}
+  .meta-row{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-bottom:18px;
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .meta-row span b{color:var(--ink);}
+  .footer-note{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    color:var(--muted);
+    margin-top:30px;
+    line-height:1.6;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  #results{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="kicker">Cakewalk Reenrollment · 2027</div>
+      <h1>Vision Plan Rate Comparison</h1>
+    </div>
+    <div class="plan-tag">MetLife · Websurance · Guardian (TAA)</div>
+  </header>
+
+  <div class="panel">
+    <h2>Member Details</h2>
+    <div class="grid">
+      <div>
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob">
+      </div>
+      <div>
+        <label for="zip">ZIP Code</label>
+        <input type="text" id="zip" maxlength="5" placeholder="e.g. 07302">
+      </div>
+      <div>
+        <label for="salary">Annual Salary</label>
+        <input type="number" id="salary" placeholder="e.g. 65000">
+      </div>
+      <div>
+        <label for="tier">Coverage Tier</label>
+        <select id="tier">
+          <option value="ee">Employee Only</option>
+          <option value="ee_sp">Employee + Spouse</option>
+          <option value="ee_ch">Employee + Child(ren)</option>
+          <option value="fam">Family</option>
+        </select>
+      </div>
+    </div>
+    <div class="hint">
+      Vision premiums are priced by <b>coverage tier</b> and, for MetLife and Websurance, by <b>rating region</b> (derived from ZIP). They are not age- or salary-rated. DOB and salary are captured here so this tool can be extended to age/salary-rated products (LTD, STD, Life) without changing the input form.
+    </div>
+    <button onclick="runCompare()">Compare Rates</button>
+  </div>
+
+  <div class="panel" id="results">
+    <h2>Monthly Premium Comparison</h2>
+    <div class="meta-row">
+      <span>Age: <b id="outAge">–</b></span>
+      <span>ZIP: <b id="outZip">–</b></span>
+      <span>State: <b id="outState">–</b></span>
+      <span>Tier: <b id="outTier">–</b></span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Carrier</th><th>Rating Basis</th><th>Monthly Premium</th></tr>
+      </thead>
+      <tbody id="rateBody"></tbody>
+    </table>
+    <div class="note-box" id="dataNote"></div>
+  </div>
+
+  <div class="footer-note">
+    Source data: <code>All_Rates.xlsx</code> (TAA, MTN West, Websurance sheets), <code>TAA_PRICE_LIST.xlsx</code>, <code>AMFAM_vs_MetLife_Comparison.xlsx</code> (Rate Comparison – Dental, Vision tab). Region assignment uses standard USPS ZIP3 prefix-to-state ranges. This is a working v1 — flag any rate or mapping discrepancy back to the project plan for correction.
+  </div>
+
+</div>
+
+<script>
+// ---- ZIP3 prefix -> state ----
+const zip3Ranges = [
+  [0,5,'NY'],[6,9,'PR'],[10,27,'MA'],[28,29,'RI'],[30,38,'NH'],[39,49,'ME'],
+  [50,59,'VT'],[60,69,'CT'],[70,89,'NJ'],[100,149,'NY'],[150,196,'PA'],
+  [197,199,'DE'],[200,205,'DC'],[206,219,'MD'],[220,246,'VA'],[247,268,'WV'],
+  [270,289,'NC'],[290,299,'SC'],[300,319,'GA'],[320,349,'FL'],[350,369,'AL'],
+  [370,385,'TN'],[386,397,'MS'],[398,399,'GA'],[400,427,'KY'],[430,459,'OH'],
+  [460,479,'IN'],[480,499,'MI'],[500,528,'IA'],[530,549,'WI'],[550,567,'MN'],
+  [570,577,'SD'],[580,588,'ND'],[590,599,'MT'],[600,629,'IL'],[630,658,'MO'],
+  [660,679,'KS'],[680,693,'NE'],[700,714,'LA'],[716,729,'AR'],[730,749,'OK'],
+  [750,799,'TX'],[885,885,'TX'],[800,816,'CO'],[820,831,'WY'],[832,838,'ID'],
+  [840,847,'UT'],[850,865,'AZ'],[870,884,'NM'],[889,898,'NV'],[900,961,'CA'],
+  [967,968,'HI'],[970,979,'OR'],[980,994,'WA'],[995,999,'AK']
+];
+function zipToState(zip){
+  const n = parseInt(zip.slice(0,3),10);
+  for(const [lo,hi,st] of zip3Ranges){ if(n>=lo && n<=hi) return st; }
+  return null;
+}
+
+// ---- Region mapping per carrier ----
+function metlifeRegion(state){
+  if(state==='AK') return 'AK';
+  if(['CA','CT','HI','NJ','NV'].includes(state)) return 'A';
+  if(['DE','FL','IL','KY','MI','NE','PA','WI'].includes(state)) return 'B';
+  if(state==='MN') return 'MN';
+  return 'OTHER';
+}
+function websuranceRegion(state){
+  if(state==='AK') return 'AK';
+  if(['CA','CT','HI','NJ','NV','WA'].includes(state)) return 'A';
+  return 'OTHER';
+}
+
+// ---- Rate tables (monthly premium): [ee, ee_sp, ee_ch, fam] ----
+// Source: AMFAM_vs_MetLife_Comparison.xlsx, "Rate Comparison - Dental, Visio" tab
+const metlifeRates = {
+  AK:    [13.06, 26.18, 22.16, 36.53],
+  A:     [11.10, 22.24, 18.83, 31.05],
+  B:     [ 9.60, 19.25, 16.30, 26.87],
+  MN:    [ 7.49, 15.00, 12.70, 20.94],
+  OTHER: [10.23, 20.50, 17.36, 28.62]
+};
+const websuranceRates = {
+  AK:    [12.23, 24.52, 20.75, 34.23],
+  A:     [ 9.48, 19.00, 16.08, 26.52],
+  OTHER: [ 9.48, 19.00, 16.08, 26.52]
+};
+// Guardian (TAA) - flat nationwide, not region-rated.
+// TAA_PRICE_LIST.xlsx "VISION" section (used as primary source):
+const guardianTAARate = [13.81, 26.15, 27.37, 37.57];
+// Note: All_Rates.xlsx "TAA" sheet lists a slightly different set for this same
+// plan design (13.59 / 25.71 / 26.20 / 37.57) - family rate matches, EE/EE+Sp/EE+Ch
+// do not. Flagged below; confirm which is current before using for enrollment.
+
+const tierLabel = {ee:'Employee Only', ee_sp:'Employee + Spouse', ee_ch:'Employee + Child(ren)', fam:'Family'};
+const tierIdx = {ee:0, ee_sp:1, ee_ch:2, fam:3};
+
+function calcAge(dobStr){
+  if(!dobStr) return null;
+  const dob = new Date(dobStr);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if(m < 0 || (m===0 && today.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+function runCompare(){
+  const dob = document.getElementById('dob').value;
+  const zip = document.getElementById('zip').value.trim();
+  const tier = document.getElementById('tier').value;
+  const idx = tierIdx[tier];
+
+  const age = calcAge(dob);
+  const state = zip.length>=3 ? zipToState(zip) : null;
+
+  document.getElementById('outAge').textContent = age!==null ? age : '–';
+  document.getElementById('outZip').textContent = zip || '–';
+  document.getElementById('outState').textContent = state || 'Unrecognized ZIP';
+  document.getElementById('outTier').textContent = tierLabel[tier];
+
+  let rows = [];
+  if(state){
+    const mlRegion = metlifeRegion(state);
+    const wsRegion = websuranceRegion(state);
+    rows.push({carrier:'MetLife', basis:'Region: ' + metlifeRegionName(mlRegion), rate: metlifeRates[mlRegion][idx]});
+    rows.push({carrier:'Websurance (AMFAM)', basis:'Region: ' + websuranceRegionName(wsRegion), rate: websuranceRates[wsRegion][idx]});
+  } else {
+    rows.push({carrier:'MetLife', basis:'Enter a valid ZIP', rate: null});
+    rows.push({carrier:'Websurance (AMFAM)', basis:'Enter a valid ZIP', rate: null});
+  }
+  rows.push({carrier:'Guardian (TAA)', basis:'Flat nationwide rate', rate: guardianTAARate[idx]});
+
+  const validRates = rows.filter(r=>r.rate!==null).map(r=>r.rate);
+  const min = Math.min(...validRates);
+
+  const tbody = document.getElementById('rateBody');
+  tbody.innerHTML = '';
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    if(r.rate===min && validRates.length>1) tr.className='lowest';
+    let rateCell = r.rate!==null ? '$'+r.rate.toFixed(2) : '—';
+    let badge = '';
+    if(r.rate===min && validRates.length>1) badge = '<span class="badge best">Lowest</span>';
+    if(r.carrier.startsWith('Websurance')) badge += '<span class="badge legacy">Migrating away</span>';
+    tr.innerHTML = `<td>${r.carrier}</td><td>${r.basis}</td><td class="rate">${rateCell}${badge}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('dataNote').innerHTML =
+    '<strong>Open item:</strong> the Guardian (TAA) vision rate has two slightly different values across source files for the Employee+Spouse and Employee+Child(ren) tiers (All_Rates.xlsx "TAA" sheet vs. TAA_PRICE_LIST.xlsx). This tool currently uses TAA_PRICE_LIST.xlsx. Confirm the correct figure before using this for enrollment communications.';
+
+  document.getElementById('results').style.display = 'block';
+}
+
+function metlifeRegionName(code){
+  const names = {AK:'Alaska', A:'CA/CT/HI/NJ/NV', B:'DE/FL/IL/KY/MI/NE/PA/WI', MN:'Minnesota', OTHER:'All other states'};
+  return names[code] || code;
+}
+function websuranceRegionName(code){
+  const names = {AK:'Alaska', A:'CA/CT/HI/NJ/NV/WA', OTHER:'All other approved states'};
+  return names[code] || code;
+}
+</script>
+</body>
+</html>
