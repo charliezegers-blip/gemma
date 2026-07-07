@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dental Plan Rate Comparison</title>
+<style>
+  :root{
+    --ink:#1c2b2e;
+    --paper:#f7f5f0;
+    --line:#d8d3c4;
+    --accent:#0f6e5c;
+    --accent-soft:#e4f0ec;
+    --amber:#a9631a;
+    --amber-soft:#f5e9db;
+    --muted:#6b6459;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Georgia',serif;
+    padding:32px 20px 60px;
+  }
+  .wrap{max-width:940px;margin:0 auto;}
+  header{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  h1{font-size:1.7rem;margin:0;letter-spacing:0.01em;font-weight:600;}
+  .kicker{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-transform:uppercase;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .plan-tag{font-family:'Helvetica Neue',Arial,sans-serif;font-size:0.78rem;color:var(--muted);}
+  .panel{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px 24px;
+    margin-bottom:24px;
+  }
+  .panel h2{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--accent);
+    margin:0 0 16px 0;
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:16px;
+  }
+  label{
+    display:block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  input,select{
+    width:100%;
+    padding:9px 10px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.95rem;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  input:focus,select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    background:var(--white);
+  }
+  .hint{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-top:10px;
+    line-height:1.5;
+  }
+  .zone-hint{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--amber);
+    background:var(--amber-soft);
+    border-left:3px solid var(--amber);
+    padding:10px 12px;
+    margin-top:14px;
+    line-height:1.5;
+  }
+  button{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    background:var(--accent);
+    color:var(--white);
+    border:none;
+    padding:11px 22px;
+    border-radius:3px;
+    cursor:pointer;
+    margin-top:18px;
+  }
+  button:hover{background:#0b5747;}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.92rem;
+  }
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);}
+  th{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    color:var(--muted);
+    font-weight:600;
+  }
+  td.rate{
+    font-family:'Iowan Old Style','Georgia',serif;
+    font-size:1.15rem;
+    font-weight:600;
+  }
+  tr.lowest td.rate{color:var(--accent);}
+  tr.lowest{background:var(--accent-soft);}
+  .badge{
+    display:inline-block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.65rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:2px 7px;
+    border-radius:9px;
+    margin-left:8px;
+    vertical-align:middle;
+  }
+  .badge.best{background:var(--accent);color:#fff;}
+  .badge.legacy{background:var(--amber-soft);color:var(--amber);}
+  .note-box{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.8rem;
+    color:var(--muted);
+    background:var(--amber-soft);
+    border-left:3px solid var(--amber);
+    padding:12px 14px;
+    margin-top:18px;
+    line-height:1.55;
+  }
+  .note-box strong{color:var(--ink);}
+  .meta-row{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-bottom:18px;
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .meta-row span b{color:var(--ink);}
+  .footer-note{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    color:var(--muted);
+    margin-top:30px;
+    line-height:1.6;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  #results{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="kicker">Cakewalk Reenrollment · 2027</div>
+      <h1>Dental Plan Rate Comparison</h1>
+    </div>
+    <div class="plan-tag">MetLife · Websurance · Sun Life (TAA)</div>
+  </header>
+
+  <div class="panel">
+    <h2>Member Details</h2>
+    <div class="grid">
+      <div>
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob">
+      </div>
+      <div>
+        <label for="zip">ZIP Code</label>
+        <input type="text" id="zip" maxlength="5" placeholder="e.g. 07302">
+      </div>
+      <div>
+        <label for="salary">Annual Salary</label>
+        <input type="number" id="salary" placeholder="e.g. 65000">
+      </div>
+      <div>
+        <label for="tier">Coverage Tier</label>
+        <select id="tier">
+          <option value="ee">Employee Only</option>
+          <option value="ee_sp">Employee + Spouse</option>
+          <option value="ee_ch">Employee + Child(ren)</option>
+          <option value="fam">Family</option>
+        </select>
+      </div>
+      <div>
+        <label for="planLevel">Plan Level</label>
+        <select id="planLevel">
+          <option value="basic">Basic</option>
+          <option value="enhanced">Enhanced</option>
+        </select>
+      </div>
+      <div>
+        <label for="zone">Rating Zone</label>
+        <select id="zone">
+          <option value="auto">Auto (from ZIP)</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+          <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+    </div>
+    <div class="hint">
+      Dental premiums are priced by <b>coverage tier</b> and, for MetLife and Websurance, by a numbered <b>rating zone (1–10)</b> rather than age or salary. DOB and salary are captured for future age/salary-rated products (LTD, STD, Life). Zone is auto-detected from ZIP using the zone mapping reference; use the dropdown to override.
+    </div>
+    <button onclick="runCompare()">Compare Rates</button>
+  </div>
+
+  <div class="panel" id="results">
+    <h2>Monthly Premium Comparison</h2>
+    <div class="meta-row">
+      <span>Age: <b id="outAge">–</b></span>
+      <span>ZIP: <b id="outZip">–</b></span>
+      <span>State: <b id="outState">–</b></span>
+      <span>Zone: <b id="outZone">–</b></span>
+      <span>Plan Level: <b id="outLevel">–</b></span>
+      <span>Tier: <b id="outTier">–</b></span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Carrier</th><th>Rating Basis</th><th>Monthly Premium</th></tr>
+      </thead>
+      <tbody id="rateBody"></tbody>
+    </table>
+    <div class="note-box" id="dataNote"></div>
+  </div>
+
+  <div class="footer-note">
+    Source data: <code>All_Rates.xlsx</code> (Websurance sheet, dental zone tables), <code>TAA_PRICE_LIST.xlsx</code> / <code>All_Rates.xlsx</code> "TAA" &amp; "MTN West" sheets (flat Base/Preferred rates), <code>AMFAM_vs_MetLife_Comparison.xlsx</code> ("Rate Comparison – Dental, Vision" tab, MetLife zone rates), <code>Zip_Codes__Zones_1.xlsx</code> (ZIP3-to-zone reference). This is a working v1 — flag any rate or mapping discrepancy back to the project plan for correction.
+  </div>
+
+</div>
+
+<script>
+const tierLabel = {ee:'Employee Only', ee_sp:'Employee + Spouse', ee_ch:'Employee + Child(ren)', fam:'Family'};
+const tierIdx = {ee:0, ee_sp:1, ee_ch:2, fam:3};
+
+// ZIP3 -> [zone, state]. Source: Zip_Codes__Zones_1.xlsx
+const zip3ToZone = {"350":["1","Alabama"],"351":["1","Alabama"],"354":["1","Alabama"],"355":["1","Alabama"],"360":["1","Alabama"],"361":["1","Alabama"],"363":["1","Alabama"],"364":["1","Alabama"],"366":["1","Alabama"],"367":["1","Alabama"],"368":["1","Alabama"],"369":["1","Alabama"],"352":["2","Alabama"],"356":["2","Alabama"],"357":["2","Alabama"],"358":["2","Alabama"],"359":["2","Alabama"],"362":["2","Alabama"],"365":["2","Alabama"],"996":["6","Alaska"],"997":["7","Alaska"],"995":["8","Alaska"],"998":["8","Alaska"],"999":["9","Alaska"],"856":["2","Arizona"],"853":["3","Arizona"],"855":["3","Arizona"],"857":["3","Arizona"],"859":["3","Arizona"],"850":["4","Arizona"],"851":["4","Arizona"],"852":["4","Arizona"],"863":["4","Arizona"],"864":["4","Arizona"],"860":["5","Arizona"],"865":["6","Arizona"],"716":["1","Arkansas"],"717":["1","Arkansas"],"718":["1","Arkansas"],"719":["1","Arkansas"],"720":["1","Arkansas"],"721":["1","Arkansas"],"723":["1","Arkansas"],"728":["1","Arkansas"],"722":["2","Arkansas"],"724":["2","Arkansas"],"725":["2","Arkansas"],"726":["2","Arkansas"],"727":["2","Arkansas"],"729":["2","Arkansas"],"937":["3","California"],"936":["4","California"],"922":["5","California"],"923":["5","California"],"924":["5","California"],"925":["5","California"],"930":["5","California"],"932":["5","California"],"933":["5","California"],"956":["5","California"],"957":["5","California"],"919":["6","California"],"920":["6","California"],"921":["6","California"],"928":["6","California"],"934":["6","California"],"935":["6","California"],"939":["6","California"],"952":["6","California"],"958":["6","California"],"906":["7","California"],"907":["7","California"],"908":["7","California"],"910":["7","California"],"911":["7","California"],"912":["7","California"],"913":["7","California"],"917":["7","California"],"918":["7","California"],"926":["7","California"],"927":["7","California"],"949":["7","California"],"953":["7","California"],"954":["7","California"],"955":["7","California"],"959":["7","California"],"960":["7","California"],"961":["7","California"],"900":["8","California"],"901":["8","California"],"902":["8","California"],"905":["8","California"],"914":["8","California"],"915":["8","California"],"916":["8","California"],"931":["8","California"],"945":["8","California"],"946":["8","California"],"947":["8","California"],"948":["8","California"],"950":["8","California"],"903":["9","California"],"904":["9","California"],"940":["9","California"],"941":["9","California"],"942":["9","California"],"951":["9","California"],"943":["10","California"],"944":["10","California"],"808":["3","Colorado"],"810":["3","Colorado"],"800":["4","Colorado"],"801":["4","Colorado"],"805":["4","Colorado"],"806":["4","Colorado"],"807":["4","Colorado"],"802":["5","Colorado"],"809":["5","Colorado"],"815":["5","Colorado"],"811":["6","Colorado"],"812":["6","Colorado"],"813":["6","Colorado"],"814":["6","Colorado"],"816":["6","Colorado"],"803":["7","Colorado"],"804":["7","Colorado"],"060":["5","Connecticut"],"061":["5","Connecticut"],"062":["5","Connecticut"],"063":["5","Connecticut"],"064":["5","Connecticut"],"067":["6","Connecticut"],"065":["7","Connecticut"],"066":["7","Connecticut"],"068":["7","Connecticut"],"069":["7","Connecticut"],"197":["5","Delaware"],"199":["5","Delaware"],"198":["6","Delaware"],"200":["5","D.C."],"202":["5","D.C."],"203":["5","D.C."],"204":["5","D.C."],"205":["5","D.C."],"335":["1","Florida"],"322":["2","Florida"],"323":["2","Florida"],"324":["2","Florida"],"325":["2","Florida"],"326":["2","Florida"],"327":["2","Florida"],"328":["2","Florida"],"336":["2","Florida"],"337":["2","Florida"],"346":["2","Florida"],"347":["2","Florida"],"349":["2","Florida"],"320":["3","Florida"],"321":["3","Florida"],"329":["3","Florida"],"338":["3","Florida"],"339":["3","Florida"],"341":["3","Florida"],"342":["3","Florida"],"344":["3","Florida"],"330":["4","Florida"],"333":["4","Florida"],"334":["4","Florida"],"331":["7","Florida"],"332":["7","Florida"],"310":["3","Georgia"],"312":["3","Georgia"],"313":["3","Georgia"],"314":["3","Georgia"],"317":["3","Georgia"],"318":["3","Georgia"],"319":["3","Georgia"],"301":["4","Georgia"],"302":["4","Georgia"],"306":["4","Georgia"],"307":["4","Georgia"],"308":["4","Georgia"],"309":["4","Georgia"],"315":["4","Georgia"],"316":["4","Georgia"],"398":["4","Georgia"],"300":["5","Georgia"],"304":["5","Georgia"],"305":["5","Georgia"],"303":["6","Georgia"],"311":["6","Georgia"],"967":["5","Hawaii"],"968":["5","Hawaii"],"832":["2","Idaho"],"834":["2","Idaho"],"833":["3","Idaho"],"835":["3","Idaho"],"838":["3","Idaho"],"836":["4","Idaho"],"837":["4","Idaho"],"612":["3","Illinois"],"619":["3","Illinois"],"620":["3","Illinois"],"622":["3","Illinois"],"623":["3","Illinois"],"625":["3","Illinois"],"626":["3","Illinois"],"609":["4","Illinois"],"610":["4","Illinois"],"611":["4","Illinois"],"613":["4","Illinois"],"614":["4","Illinois"],"615":["4","Illinois"],"616":["4","Illinois"],"617":["4","Illinois"],"618":["4","Illinois"],"624":["4","Illinois"],"627":["4","Illinois"],"628":["4","Illinois"],"629":["4","Illinois"],"604":["5","Illinois"],"600":["6","Illinois"],"601":["6","Illinois"],"603":["6","Illinois"],"605":["6","Illinois"],"606":["6","Illinois"],"608":["6","Illinois"],"602":["7","Illinois"],"607":["7","Illinois"],"470":["2","Indiana"],"471":["2","Indiana"],"473":["2","Indiana"],"474":["2","Indiana"],"460":["3","Indiana"],"461":["3","Indiana"],"462":["3","Indiana"],"466":["3","Indiana"],"472":["3","Indiana"],"476":["3","Indiana"],"478":["3","Indiana"],"479":["3","Indiana"],"463":["4","Indiana"],"464":["4","Indiana"],"465":["4","Indiana"],"467":["4","Indiana"],"468":["4","Indiana"],"469":["4","Indiana"],"475":["4","Indiana"],"477":["4","Indiana"],"508":["3","Iowa"],"514":["3","Iowa"],"515":["3","Iowa"],"516":["3","Iowa"],"502":["4","Iowa"],"503":["4","Iowa"],"507":["4","Iowa"],"509":["4","Iowa"],"510":["4","Iowa"],"511":["4","Iowa"],"512":["4","Iowa"],"513":["4","Iowa"],"520":["4","Iowa"],"522":["4","Iowa"],"523":["4","Iowa"],"524":["4","Iowa"],"525":["4","Iowa"],"526":["4","Iowa"],"527":["4","Iowa"],"528":["4","Iowa"],"500":["5","Iowa"],"501":["5","Iowa"],"504":["5","Iowa"],"505":["5","Iowa"],"506":["5","Iowa"],"521":["5","Iowa"],"667":["2","Kansas"],"660":["3","Kansas"],"661":["3","Kansas"],"664":["3","Kansas"],"665":["3","Kansas"],"666":["3","Kansas"],"670":["3","Kansas"],"671":["3","Kansas"],"673":["3","Kansas"],"662":["4","Kansas"],"668":["4","Kansas"],"669":["4","Kansas"],"672":["4","Kansas"],"675":["4","Kansas"],"678":["4","Kansas"],"679":["4","Kansas"],"674":["5","Kansas"],"676":["5","Kansas"],"677":["5","Kansas"],"400":["1","Kentucky"],"401":["1","Kentucky"],"402":["1","Kentucky"],"403":["1","Kentucky"],"405":["1","Kentucky"],"406":["1","Kentucky"],"407":["1","Kentucky"],"408":["1","Kentucky"],"409":["1","Kentucky"],"411":["1","Kentucky"],"412":["1","Kentucky"],"413":["1","Kentucky"],"414":["1","Kentucky"],"415":["1","Kentucky"],"416":["1","Kentucky"],"417":["1","Kentucky"],"418":["1","Kentucky"],"425":["1","Kentucky"],"426":["1","Kentucky"],"427":["1","Kentucky"],"404":["2","Kentucky"],"410":["2","Kentucky"],"420":["2","Kentucky"],"421":["2","Kentucky"],"422":["3","Kentucky"],"423":["3","Kentucky"],"424":["3","Kentucky"],"700":["2","Louisiana"],"701":["2","Louisiana"],"704":["2","Louisiana"],"713":["2","Louisiana"],"714":["2","Louisiana"],"703":["3","Louisiana"],"706":["3","Louisiana"],"707":["3","Louisiana"],"708":["3","Louisiana"],"710":["3","Louisiana"],"711":["3","Louisiana"],"705":["4","Louisiana"],"712":["4","Louisiana"],"040":["5","Maine"],"042":["5","Maine"],"041":["6","Maine"],"043":["6","Maine"],"044":["6","Maine"],"045":["6","Maine"],"046":["6","Maine"],"047":["6","Maine"],"048":["6","Maine"],"049":["6","Maine"],"039":["7","Maine"],"212":["2","Maryland"],"210":["3","Maryland"],"211":["3","Maryland"],"216":["3","Maryland"],"206":["4","Maryland"],"214":["4","Maryland"],"215":["4","Maryland"],"218":["4","Maryland"],"219":["4","Maryland"],"207":["5","Maryland"],"208":["5","Maryland"],"209":["5","Maryland"],"217":["5","Maryland"],"010":["5","Massachusetts"],"011":["5","Massachusetts"],"012":["5","Massachusetts"],"027":["5","Massachusetts"],"013":["6","Massachusetts"],"014":["6","Massachusetts"],"015":["6","Massachusetts"],"018":["6","Massachusetts"],"019":["6","Massachusetts"],"023":["6","Massachusetts"],"025":["6","Massachusetts"],"026":["6","Massachusetts"],"016":["7","Massachusetts"],"017":["7","Massachusetts"],"020":["7","Massachusetts"],"021":["7","Massachusetts"],"022":["7","Massachusetts"],"024":["8","Massachusetts"],"480":["4","Michigan"],"481":["4","Michigan"],"483":["4","Michigan"],"485":["4","Michigan"],"486":["4","Michigan"],"487":["4","Michigan"],"482":["5","Michigan"],"484":["5","Michigan"],"490":["5","Michigan"],"493":["5","Michigan"],"494":["5","Michigan"],"495":["5","Michigan"],"496":["5","Michigan"],"497":["5","Michigan"],"488":["6","Michigan"],"489":["6","Michigan"],"491":["6","Michigan"],"492":["6","Michigan"],"498":["6","Michigan"],"499":["6","Michigan"],"550":["5","Minnesota"],"551":["5","Minnesota"],"553":["5","Minnesota"],"554":["5","Minnesota"],"555":["5","Minnesota"],"558":["5","Minnesota"],"559":["5","Minnesota"],"560":["5","Minnesota"],"561":["5","Minnesota"],"562":["5","Minnesota"],"563":["5","Minnesota"],"564":["5","Minnesota"],"565":["5","Minnesota"],"566":["5","Minnesota"],"567":["5","Minnesota"],"556":["6","Minnesota"],"557":["6","Minnesota"],"395":["2","Mississippi"],"386":["3","Mississippi"],"387":["3","Mississippi"],"388":["3","Mississippi"],"389":["3","Mississippi"],"390":["3","Mississippi"],"391":["3","Mississippi"],"392":["3","Mississippi"],"393":["3","Mississippi"],"394":["3","Mississippi"],"396":["3","Mississippi"],"397":["3","Mississippi"],"635":["3","Missouri"],"638":["3","Missouri"],"639":["3","Missouri"],"640":["3","Missouri"],"644":["3","Missouri"],"645":["3","Missouri"],"646":["3","Missouri"],"647":["3","Missouri"],"653":["3","Missouri"],"654":["3","Missouri"],"655":["3","Missouri"],"657":["3","Missouri"],"630":["4","Missouri"],"633":["4","Missouri"],"634":["4","Missouri"],"636":["4","Missouri"],"637":["4","Missouri"],"641":["4","Missouri"],"648":["4","Missouri"],"652":["4","Missouri"],"656":["4","Missouri"],"658":["4","Missouri"],"631":["5","Missouri"],"650":["5","Missouri"],"651":["5","Missouri"],"590":["4","Montana"],"597":["4","Montana"],"591":["5","Montana"],"592":["5","Montana"],"593":["5","Montana"],"594":["5","Montana"],"595":["5","Montana"],"596":["5","Montana"],"598":["6","Montana"],"599":["6","Montana"],"680":["2","Nebraska"],"681":["3","Nebraska"],"683":["3","Nebraska"],"684":["3","Nebraska"],"685":["3","Nebraska"],"686":["3","Nebraska"],"687":["3","Nebraska"],"688":["3","Nebraska"],"689":["3","Nebraska"],"690":["3","Nebraska"],"691":["3","Nebraska"],"692":["3","Nebraska"],"693":["3","Nebraska"],"890":["3","Nevada"],"889":["4","Nevada"],"891":["4","Nevada"],"893":["5","Nevada"],"894":["5","Nevada"],"895":["6","Nevada"],"897":["6","Nevada"],"898":["6","Nevada"],"080":["3","New Jersey"],"082":["3","New Jersey"],"081":["4","New Jersey"],"083":["4","New Jersey"],"084":["4","New Jersey"],"071":["5","New Jersey"],"072":["5","New Jersey"],"073":["5","New Jersey"],"086":["5","New Jersey"],"087":["5","New Jersey"],"077":["6","New Jersey"],"078":["6","New Jersey"],"088":["6","New Jersey"],"089":["6","New Jersey"],"070":["7","New Jersey"],"074":["7","New Jersey"],"075":["7","New Jersey"],"085":["7","New Jersey"],"076":["8","New Jersey"],"079":["8","New Jersey"],"120":["3","New York"],"121":["3","New York"],"128":["3","New York"],"140":["3","New York"],"141":["3","New York"],"142":["3","New York"],"143":["3","New York"],"148":["3","New York"],"122":["4","New York"],"123":["4","New York"],"124":["4","New York"],"125":["4","New York"],"126":["4","New York"],"127":["4","New York"],"129":["4","New York"],"132":["4","New York"],"133":["4","New York"],"134":["4","New York"],"135":["4","New York"],"136":["4","New York"],"144":["4","New York"],"146":["4","New York"],"147":["4","New York"],"149":["4","New York"],"117":["5","New York"],"119":["5","New York"],"130":["5","New York"],"131":["5","New York"],"137":["5","New York"],"138":["5","New York"],"139":["5","New York"],"145":["5","New York"],"104":["6","New York"],"109":["6","New York"],"105":["7","New York"],"114":["7","New York"],"115":["7","New York"],"103":["8","New York"],"106":["8","New York"],"107":["8","New York"],"108":["8","New York"],"110":["8","New York"],"111":["8","New York"],"116":["8","New York"],"118":["8","New York"],"100":["9","New York"],"102":["9","New York"],"112":["9","New York"],"113":["9","New York"],"101":["10","New York"],"283":["3","North Carolina"],"270":["4","North Carolina"],"278":["4","North Carolina"],"279":["4","North Carolina"],"280":["4","North Carolina"],"287":["4","North Carolina"],"271":["5","North Carolina"],"272":["5","North Carolina"],"273":["5","North Carolina"],"274":["5","North Carolina"],"275":["5","North Carolina"],"281":["5","North Carolina"],"284":["5","North Carolina"],"285":["5","North Carolina"],"286":["5","North Carolina"],"288":["5","North Carolina"],"289":["5","North Carolina"],"276":["6","North Carolina"],"282":["6","North Carolina"],"277":["7","North Carolina"],"580":["6","North Dakota"],"581":["6","North Dakota"],"582":["6","North Dakota"],"583":["6","North Dakota"],"584":["6","North Dakota"],"585":["6","North Dakota"],"586":["6","North Dakota"],"587":["6","North Dakota"],"588":["6","North Dakota"],"454":["1","Ohio"],"456":["1","Ohio"],"444":["2","Ohio"],"445":["2","Ohio"],"447":["2","Ohio"],"453":["2","Ohio"],"455":["2","Ohio"],"457":["2","Ohio"],"430":["3","Ohio"],"431":["3","Ohio"],"435":["3","Ohio"],"437":["3","Ohio"],"438":["3","Ohio"],"439":["3","Ohio"],"440":["3","Ohio"],"441":["3","Ohio"],"442":["3","Ohio"],"443":["3","Ohio"],"446":["3","Ohio"],"450":["3","Ohio"],"451":["3","Ohio"],"452":["3","Ohio"],"432":["4","Ohio"],"433":["4","Ohio"],"434":["4","Ohio"],"436":["4","Ohio"],"448":["4","Ohio"],"449":["4","Ohio"],"458":["4","Ohio"],"744":["2","Oklahoma"],"748":["2","Oklahoma"],"735":["3","Oklahoma"],"736":["3","Oklahoma"],"739":["3","Oklahoma"],"740":["3","Oklahoma"],"743":["3","Oklahoma"],"730":["4","Oklahoma"],"731":["4","Oklahoma"],"734":["4","Oklahoma"],"737":["4","Oklahoma"],"738":["4","Oklahoma"],"741":["4","Oklahoma"],"745":["4","Oklahoma"],"746":["4","Oklahoma"],"747":["4","Oklahoma"],"749":["4","Oklahoma"],"150":["1","Pennsylvania"],"151":["1","Pennsylvania"],"153":["1","Pennsylvania"],"154":["1","Pennsylvania"],"155":["1","Pennsylvania"],"156":["1","Pennsylvania"],"157":["1","Pennsylvania"],"158":["1","Pennsylvania"],"159":["1","Pennsylvania"],"160":["1","Pennsylvania"],"161":["1","Pennsylvania"],"166":["1","Pennsylvania"],"152":["2","Pennsylvania"],"162":["2","Pennsylvania"],"163":["2","Pennsylvania"],"164":["2","Pennsylvania"],"165":["2","Pennsylvania"],"167":["2","Pennsylvania"],"170":["2","Pennsylvania"],"171":["2","Pennsylvania"],"168":["3","Pennsylvania"],"172":["3","Pennsylvania"],"173":["3","Pennsylvania"],"174":["3","Pennsylvania"],"175":["3","Pennsylvania"],"178":["3","Pennsylvania"],"180":["3","Pennsylvania"],"181":["3","Pennsylvania"],"182":["3","Pennsylvania"],"183":["3","Pennsylvania"],"184":["3","Pennsylvania"],"185":["3","Pennsylvania"],"186":["3","Pennsylvania"],"187":["3","Pennsylvania"],"188":["3","Pennsylvania"],"191":["3","Pennsylvania"],"195":["3","Pennsylvania"],"169":["4","Pennsylvania"],"176":["4","Pennsylvania"],"177":["4","Pennsylvania"],"179":["4","Pennsylvania"],"189":["4","Pennsylvania"],"190":["4","Pennsylvania"],"194":["4","Pennsylvania"],"196":["4","Pennsylvania"],"192":["5","Pennsylvania"],"193":["5","Pennsylvania"],"028":["3","Rhode Island"],"029":["4","Rhode Island"],"295":["2","South Carolina"],"290":["3","South Carolina"],"291":["3","South Carolina"],"292":["3","South Carolina"],"294":["3","South Carolina"],"297":["3","South Carolina"],"299":["3","South Carolina"],"293":["4","South Carolina"],"298":["4","South Carolina"],"296":["5","South Carolina"],"570":["5","South Dakota"],"571":["5","South Dakota"],"572":["5","South Dakota"],"573":["5","South Dakota"],"574":["5","South Dakota"],"575":["5","South Dakota"],"576":["5","South Dakota"],"577":["5","South Dakota"],"376":["1","Tennessee"],"380":["1","Tennessee"],"381":["1","Tennessee"],"382":["1","Tennessee"],"383":["1","Tennessee"],"384":["1","Tennessee"],"370":["2","Tennessee"],"371":["2","Tennessee"],"373":["2","Tennessee"],"374":["2","Tennessee"],"377":["2","Tennessee"],"378":["2","Tennessee"],"379":["2","Tennessee"],"385":["2","Tennessee"],"372":["3","Tennessee"],"780":["1","Texas"],"783":["1","Texas"],"784":["1","Texas"],"785":["1","Texas"],"794":["1","Texas"],"798":["1","Texas"],"766":["2","Texas"],"767":["2","Texas"],"779":["2","Texas"],"781":["2","Texas"],"782":["2","Texas"],"793":["2","Texas"],"797":["2","Texas"],"799":["2","Texas"],"754":["3","Texas"],"755":["3","Texas"],"756":["3","Texas"],"757":["3","Texas"],"759":["3","Texas"],"765":["3","Texas"],"775":["3","Texas"],"776":["3","Texas"],"777":["3","Texas"],"778":["3","Texas"],"786":["3","Texas"],"795":["3","Texas"],"796":["3","Texas"],"750":["4","Texas"],"751":["4","Texas"],"758":["4","Texas"],"760":["4","Texas"],"761":["4","Texas"],"762":["4","Texas"],"763":["4","Texas"],"764":["4","Texas"],"770":["4","Texas"],"772":["4","Texas"],"773":["4","Texas"],"774":["4","Texas"],"788":["4","Texas"],"768":["5","Texas"],"769":["5","Texas"],"771":["5","Texas"],"787":["5","Texas"],"789":["5","Texas"],"790":["5","Texas"],"791":["5","Texas"],"792":["5","Texas"],"885":["5","Texas"],"752":["6","Texas"],"753":["6","Texas"],"845":["3","Utah"],"840":["4","Utah"],"842":["4","Utah"],"843":["4","Utah"],"844":["4","Utah"],"847":["4","Utah"],"841":["5","Utah"],"846":["5","Utah"],"050":["6","Vermont"],"051":["6","Vermont"],"052":["6","Vermont"],"053":["6","Vermont"],"054":["6","Vermont"],"055":["6","Vermont"],"056":["6","Vermont"],"057":["6","Vermont"],"058":["6","Vermont"],"059":["6","Vermont"],"230":["3","Virginia"],"231":["3","Virginia"],"232":["3","Virginia"],"236":["3","Virginia"],"238":["3","Virginia"],"240":["3","Virginia"],"241":["3","Virginia"],"242":["3","Virginia"],"224":["4","Virginia"],"225":["4","Virginia"],"229":["4","Virginia"],"233":["4","Virginia"],"234":["4","Virginia"],"235":["4","Virginia"],"237":["4","Virginia"],"239":["4","Virginia"],"243":["4","Virginia"],"245":["4","Virginia"],"246":["4","Virginia"],"201":["5","Virginia"],"220":["5","Virginia"],"221":["5","Virginia"],"222":["5","Virginia"],"223":["5","Virginia"],"226":["5","Virginia"],"227":["5","Virginia"],"228":["5","Virginia"],"244":["5","Virginia"],"248":["1","West Virginia"],"255":["1","West Virginia"],"257":["1","West Virginia"],"260":["1","West Virginia"],"265":["1","West Virginia"],"247":["2","West Virginia"],"249":["2","West Virginia"],"250":["2","West Virginia"],"251":["2","West Virginia"],"252":["2","West Virginia"],"253":["2","West Virginia"],"254":["2","West Virginia"],"256":["2","West Virginia"],"258":["2","West Virginia"],"259":["2","West Virginia"],"261":["2","West Virginia"],"263":["2","West Virginia"],"264":["2","West Virginia"],"266":["2","West Virginia"],"267":["2","West Virginia"],"268":["2","West Virginia"],"262":["3","West Virginia"],"532":["4","Wisconsin"],"546":["4","Wisconsin"],"547":["4","Wisconsin"],"530":["5","Wisconsin"],"531":["5","Wisconsin"],"534":["5","Wisconsin"],"535":["5","Wisconsin"],"538":["5","Wisconsin"],"539":["5","Wisconsin"],"540":["5","Wisconsin"],"541":["5","Wisconsin"],"542":["5","Wisconsin"],"544":["5","Wisconsin"],"545":["5","Wisconsin"],"548":["5","Wisconsin"],"549":["5","Wisconsin"],"537":["6","Wisconsin"],"543":["6","Wisconsin"],"822":["5","Wyoming"],"823":["5","Wyoming"],"824":["5","Wyoming"],"825":["5","Wyoming"],"827":["5","Wyoming"],"828":["5","Wyoming"],"829":["5","Wyoming"],"830":["5","Wyoming"],"831":["5","Wyoming"],"820":["6","Wyoming"],"821":["6","Wyoming"],"826":["6","Wyoming"],"985":["5","Washington"],"990":["5","Washington"],"991":["5","Washington"],"992":["5","Washington"],"993":["5","Washington"],"994":["5","Washington"],"980":["6","Washington"],"981":["6","Washington"],"982":["6","Washington"],"983":["6","Washington"],"984":["6","Washington"],"986":["6","Washington"],"987":["6","Washington"],"988":["6","Washington"],"989":["6","Washington"]}
+;
+// States present in the reference file with no zone assigned (marked "Excluded / All Zips")
+const excludedStates = ['Oregon', 'New Mexico', 'New Hampshire'];
+
+function lookupZone(zip){
+  if(!zip || zip.length < 3) return {status:'invalid'};
+  const zip3 = zip.slice(0,3);
+  const entry = zip3ToZone[zip3];
+  if(!entry) return {status:'not_found'};
+  return {status:'ok', zone: entry[0], state: entry[1]};
+}
+
+
+// Zone-rated tables: [ee, ee_sp, ee_ch, fam] per zone 1-10
+// Source: AMFAM_vs_MetLife_Comparison.xlsx "Rate Comparison - Dental, Visio" tab
+const metlifeBasic = {
+  ee:    [18.71,20.65,22.89,25.24,27.70,30.39,33.23,36.74,41.45,47.84],
+  ee_sp: [36.90,40.71,45.13,49.77,54.64,59.95,65.56,72.47,81.76,94.38],
+  ee_ch: [46.15,50.84,56.32,62.02,68.03,74.60,81.51,90.05,101.52,117.18],
+  fam:   [69.42,76.50,84.76,93.37,102.44,112.35,122.78,135.65,152.97,176.57]
+};
+const metlifeEnhanced = {
+  ee:    [29.30,32.56,36.38,40.35,44.52,49.08,53.88,59.82,67.77,78.67],
+  ee_sp: [58.33,64.82,72.43,80.32,88.64,97.72,107.27,119.09,134.95,156.62],
+  ee_ch: [68.23,75.37,83.33,91.92,100.76,110.57,121.03,133.61,150.77,173.23],
+  fam:   [104.47,115.57,128.08,141.45,155.31,170.61,186.86,206.56,233.33,268.69]
+};
+const websuranceBasic = {
+  ee:    [22.38,24.30,25.75,27.25,30.84,32.02,34.85,37.16,41.45,43.33],
+  ee_sp: [44.49,48.31,51.16,54.18,61.31,63.65,69.26,73.87,82.36,86.14],
+  ee_ch: [49.51,53.63,57.11,60.27,68.28,70.66,76.89,82.01,91.57,95.71],
+  fam:   [76.70,83.16,88.44,93.40,105.80,109.55,119.21,127.15,141.91,148.38]
+};
+const websuranceEnhanced = {
+  ee:    [27.93,31.74,34.79,37.62,42.79,45.38,50.05,54.88,61.38,68.87],
+  ee_sp: [55.54,63.14,69.15,74.81,85.10,90.27,99.55,109.13,122.07,136.94],
+  ee_ch: [65.72,75.17,79.83,86.52,97.64,103.06,114.37,124.54,136.84,153.55],
+  fam:   [100.42,114.40,122.68,132.90,150.25,158.80,175.95,191.91,211.73,237.54]
+};
+// Sun Life (TAA) - flat nationwide, not zone-rated.
+// Source: TAA_PRICE_LIST.xlsx / All_Rates.xlsx "TAA" & "MTN West" sheets (all three agree on these figures)
+const sunLifeTAA = {
+  basic:    [22.55, 43.21, 50.10, 88.43],
+  enhanced: [43.89, 86.87, 111.43, 154.41]
+};
+
+function calcAge(dobStr){
+  if(!dobStr) return null;
+  const dob = new Date(dobStr);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if(m < 0 || (m===0 && today.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+function runCompare(){
+  const dob = document.getElementById('dob').value;
+  const zip = document.getElementById('zip').value.trim();
+  const tier = document.getElementById('tier').value;
+  const level = document.getElementById('planLevel').value;
+  const zoneSelect = document.getElementById('zone').value;
+  const idx = tierIdx[tier];
+
+  const age = calcAge(dob);
+  document.getElementById('outAge').textContent = age!==null ? age : '–';
+  document.getElementById('outZip').textContent = zip || '–';
+  document.getElementById('outLevel').textContent = level==='basic' ? 'Basic' : 'Enhanced';
+  document.getElementById('outTier').textContent = tierLabel[tier];
+
+  let zone, state, lookupNote = '';
+  if(zoneSelect === 'auto'){
+    const lookup = lookupZone(zip);
+    if(lookup.status === 'invalid'){
+      state = '–'; zone = null;
+      lookupNote = 'Enter a valid ZIP code, or select a zone manually.';
+    } else if(lookup.status === 'not_found'){
+      state = 'Unmapped ZIP3';
+      zone = null;
+      lookupNote = 'This ZIP3 prefix is not in the zone reference file. Select a zone manually, or confirm this ZIP with the zone mapping source.';
+    } else {
+      state = lookup.state;
+      zone = lookup.zone;
+      if(excludedStates.includes(state)){
+        lookupNote = state + ' is marked "Excluded / All Zips" in the zone reference \u2014 no zone-rated dental pricing is defined for this state. Select a zone manually if a rate is still needed, or confirm coverage availability.';
+        zone = null;
+      }
+    }
+  } else {
+    zone = zoneSelect;
+    state = '(manual override)';
+  }
+
+  document.getElementById('outState').textContent = state;
+  document.getElementById('outZone').textContent = zone || '–';
+
+  const resultsPanel = document.getElementById('results');
+  const tbody = document.getElementById('rateBody');
+  tbody.innerHTML = '';
+
+  if(!zone){
+    document.getElementById('dataNote').innerHTML = '<strong>Cannot calculate zone-rated premiums:</strong> ' + lookupNote +
+      ' Sun Life (TAA) is flat nationwide and unaffected by this.';
+    const gTable = sunLifeTAA[level];
+    tbody.innerHTML = `<tr><td>Sun Life (TAA)</td><td>Flat nationwide rate</td><td class="rate">$${gTable[idx].toFixed(2)}</td></tr>`;
+    resultsPanel.style.display = 'block';
+    return;
+  }
+
+  const mlTable = level==='basic' ? metlifeBasic : metlifeEnhanced;
+  const wsTable = level==='basic' ? websuranceBasic : websuranceEnhanced;
+  const gTable = sunLifeTAA[level];
+
+  const rows = [
+    {carrier:'MetLife', basis:'Zone '+zone, rate: mlTable[tier][zone-1]},
+    {carrier:'Websurance (AMFAM)', basis:'Zone '+zone, rate: wsTable[tier][zone-1]},
+    {carrier:'Sun Life (TAA)', basis:'Flat nationwide rate', rate: gTable[idx]}
+  ];
+
+  const min = Math.min(...rows.map(r=>r.rate));
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    if(r.rate===min) tr.className='lowest';
+    let badge = '';
+    if(r.rate===min) badge = '<span class="badge best">Lowest</span>';
+    if(r.carrier.startsWith('Websurance')) badge += '<span class="badge legacy">Migrating away</span>';
+    tr.innerHTML = `<td>${r.carrier}</td><td>${r.basis}</td><td class="rate">$${r.rate.toFixed(2)}${badge}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('dataNote').innerHTML =
+    '<strong>Design caveat:</strong> for the Basic tier, MetLife\u2019s plan design (100/50/0, 90th percentile) is <em>not structurally equivalent</em> to Websurance/AMFAM Basic (100/80/50, MAC fee basis) \u2014 MetLife pays nothing on major/Type III services while AMFAM covers 50%. Rate differences at Basic level reflect differing plan designs, not just pricing. Enhanced-tier designs are matching (100/80/50/50 with child ortho) across MetLife and Websurance.';
+
+  resultsPanel.style.display = 'block';
+}
+</script>
+</body>
+</html>

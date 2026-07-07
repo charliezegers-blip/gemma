@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rate Comparison Tools</title>
+<style>
+  :root{
+    --ink:#1c2b2e;
+    --paper:#f7f5f0;
+    --line:#d8d3c4;
+    --accent:#0f6e5c;
+    --accent-soft:#e4f0ec;
+    --muted:#6b6459;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Georgia',serif;
+    padding:40px 20px 60px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  header{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:28px;
+  }
+  h1{font-size:1.7rem;margin:0 0 4px;letter-spacing:0.01em;font-weight:600;}
+  .kicker{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-transform:uppercase;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .sub{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    color:var(--muted);
+  }
+  .card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:20px 22px;
+    margin-bottom:14px;
+    text-decoration:none;
+    color:inherit;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .card:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .card-title{
+    font-size:1.15rem;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .card-desc{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.82rem;
+    color:var(--muted);
+    line-height:1.4;
+  }
+  .card-plans{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--accent);
+    margin-top:6px;
+  }
+  .arrow{
+    font-size:1.4rem;
+    color:var(--muted);
+    flex-shrink:0;
+  }
+  .card:hover .arrow{color:var(--accent);}
+  .footer-note{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    color:var(--muted);
+    margin-top:34px;
+    line-height:1.6;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Cakewalk Reenrollment · 2027</div>
+    <h1>Rate Comparison Tools</h1>
+    <div class="sub">MetLife · Websurance · Sun Life / Guardian (TAA)</div>
+  </header>
+
+  <a class="card" href="vision_calculator.html">
+    <div>
+      <div class="card-title">Vision</div>
+      <div class="card-desc">ZIP-based region rates by coverage tier.</div>
+      <div class="card-plans">MetLife · Websurance · Guardian (TAA)</div>
+    </div>
+    <div class="arrow">→</div>
+  </a>
+
+  <a class="card" href="dental_calculator.html">
+    <div>
+      <div class="card-title">Dental</div>
+      <div class="card-desc">Zone-based rates by coverage tier and plan level, auto-detected from ZIP.</div>
+      <div class="card-plans">MetLife · Websurance · Sun Life (TAA)</div>
+    </div>
+    <div class="arrow">→</div>
+  </a>
+
+  <a class="card" href="ltd_calculator.html">
+    <div>
+      <div class="card-title">Long Term Disability</div>
+      <div class="card-desc">Salary- and age-banded rates by collar class or TAA role.</div>
+      <div class="card-plans">MetLife · Websurance · Sun Life (TAA)</div>
+    </div>
+    <div class="arrow">→</div>
+  </a>
+
+  <div class="footer-note">
+    Each tool is a working v1 built from All_Rates.xlsx, TAA_PRICE_LIST.xlsx, AMFAM_vs_MetLife_Comparison.xlsx, and Zip_Codes__Zones_1.xlsx. Open items and assumptions are noted within each calculator's results panel.
+  </div>
+
+</div>
+</body>
+</html>

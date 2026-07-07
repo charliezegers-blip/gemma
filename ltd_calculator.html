@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LTD Plan Rate Comparison</title>
+<style>
+  :root{
+    --ink:#1c2b2e;
+    --paper:#f7f5f0;
+    --line:#d8d3c4;
+    --accent:#0f6e5c;
+    --accent-soft:#e4f0ec;
+    --amber:#a9631a;
+    --amber-soft:#f5e9db;
+    --muted:#6b6459;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Georgia',serif;
+    padding:32px 20px 60px;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  header{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  h1{font-size:1.7rem;margin:0;letter-spacing:0.01em;font-weight:600;}
+  .kicker{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-transform:uppercase;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .plan-tag{font-family:'Helvetica Neue',Arial,sans-serif;font-size:0.78rem;color:var(--muted);}
+  .panel{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px 24px;
+    margin-bottom:24px;
+  }
+  .panel h2{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--accent);
+    margin:0 0 16px 0;
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:16px;
+  }
+  label{
+    display:block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  input,select{
+    width:100%;
+    padding:9px 10px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.95rem;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  input:focus,select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    background:var(--white);
+  }
+  .hint{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-top:10px;
+    line-height:1.5;
+  }
+  button{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    background:var(--accent);
+    color:var(--white);
+    border:none;
+    padding:11px 22px;
+    border-radius:3px;
+    cursor:pointer;
+    margin-top:18px;
+  }
+  button:hover{background:#0b5747;}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.92rem;
+  }
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);}
+  th{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    color:var(--muted);
+    font-weight:600;
+  }
+  td.rate{
+    font-family:'Iowan Old Style','Georgia',serif;
+    font-size:1.15rem;
+    font-weight:600;
+  }
+  td.benefit{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    color:var(--muted);
+  }
+  tr.lowest td.rate{color:var(--accent);}
+  tr.lowest{background:var(--accent-soft);}
+  tr.unavailable{opacity:0.55;}
+  .badge{
+    display:inline-block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.65rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:2px 7px;
+    border-radius:9px;
+    margin-left:8px;
+    vertical-align:middle;
+  }
+  .badge.best{background:var(--accent);color:#fff;}
+  .badge.legacy{background:var(--amber-soft);color:var(--amber);}
+  .badge.na{background:#e5e1d6;color:var(--muted);}
+  .note-box{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.8rem;
+    color:var(--muted);
+    background:var(--amber-soft);
+    border-left:3px solid var(--amber);
+    padding:12px 14px;
+    margin-top:18px;
+    line-height:1.55;
+  }
+  .note-box strong{color:var(--ink);}
+  .meta-row{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-bottom:18px;
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .meta-row span b{color:var(--ink);}
+  .footer-note{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    color:var(--muted);
+    margin-top:30px;
+    line-height:1.6;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  #results{display:none;}
+  .section-label{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.7rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--muted);
+    margin:18px 0 6px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="kicker">Cakewalk Reenrollment · 2027</div>
+      <h1>LTD Plan Rate Comparison</h1>
+    </div>
+    <div class="plan-tag">MetLife · Websurance · Sun Life (TAA)</div>
+  </header>
+
+  <div class="panel">
+    <h2>Member Details</h2>
+    <div class="grid">
+      <div>
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob">
+      </div>
+      <div>
+        <label for="zip">ZIP Code</label>
+        <input type="text" id="zip" maxlength="5" placeholder="e.g. 07302">
+      </div>
+      <div>
+        <label for="salary">Annual Salary</label>
+        <input type="number" id="salary" placeholder="e.g. 85000">
+      </div>
+      <div>
+        <label for="ltdType">LTD Type</label>
+        <select id="ltdType">
+          <option value="group">Group (employer-paid)</option>
+          <option value="voluntary">Voluntary (employee-paid)</option>
+        </select>
+      </div>
+      <div>
+        <label for="collarClass">Collar Class</label>
+        <select id="collarClass">
+          <option value="white">White Collar (SIC 1)</option>
+          <option value="grey">Grey Collar (SIC 2)</option>
+          <option value="blue">Blue Collar (SIC 3)</option>
+        </select>
+      </div>
+      <div>
+        <label for="taaRole">TAA Role (Sun Life only)</label>
+        <select id="taaRole">
+          <option value="staff">Agency Staff</option>
+          <option value="agent">Agent</option>
+        </select>
+      </div>
+    </div>
+    <div class="hint">
+      ZIP isn't used for LTD pricing (no regional variation in the source data) &mdash; kept here for consistency with the other calculators. <b>Collar Class</b> drives the MetLife and Websurance rates (MetLife's SIC 1/2/3 classes map directly to White/Grey/Blue). <b>TAA Role</b> drives the Sun Life (TAA) rate instead &mdash; that plan is structured by Staff vs. Agent, not collar class, and doesn't distinguish Group vs. Voluntary. Benefit is assumed at the standard 60% of monthly salary (no separate voluntary election amount captured here).
+    </div>
+    <button onclick="runCompare()">Compare Rates</button>
+  </div>
+
+  <div class="panel" id="results">
+    <h2>Monthly Premium Comparison</h2>
+    <div class="meta-row">
+      <span>Age: <b id="outAge">–</b></span>
+      <span>Salary: <b id="outSalary">–</b></span>
+      <span>LTD Type: <b id="outType">–</b></span>
+      <span>Collar Class: <b id="outClass">–</b></span>
+      <span>TAA Role: <b id="outRole">–</b></span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Carrier</th><th>Rating Basis</th><th>Monthly Premium</th><th>Monthly Benefit (60%, capped)</th></tr>
+      </thead>
+      <tbody id="rateBody"></tbody>
+    </table>
+    <div class="note-box" id="dataNote"></div>
+  </div>
+
+  <div class="footer-note">
+    Source data: <code>TAA_PRICE_LIST.xlsx</code> / <code>All_Rates.xlsx</code> "TAA" sheet (Sun Life Staff/Agent rates), <code>All_Rates.xlsx</code> "Websurance" sheet (Group &amp; Voluntary LTD by White/Grey/Blue), <code>AMFAM_vs_MetLife_Comparison.xlsx</code> ("Rate Comparison" tab, MetLife SIC 1/2/3 rates &amp; "Plan Design Comparison" tab, max monthly benefit figures). This is a working v1 — flag any rate or assumption back to the project plan for correction.
+  </div>
+
+</div>
+
+<script>
+// ---- Group LTD rate factors (per $100 of monthly covered payroll), by income band ----
+// MetLife bands: le200k = "$200K and less"; gt200 = "$200,000.01-$300K" (Grey/Blue not published for top band)
+const metlifeGroup = {
+  white: {le200: 0.38,  gt200: 0.414},
+  grey:  {le200: 0.446, gt200: null},
+  blue:  {le200: 0.587, gt200: null}
+};
+// Websurance/AMFAM bands: le100k, le200k ($101K-$200K), le300k ($201K-$300K, Grey/Blue not published)
+const websuranceGroup = {
+  white: {le100: 0.209, le200: 0.305, le300: 0.34},
+  grey:  {le100: 0.24,  le200: 0.35,  le300: null},
+  blue:  {le100: 0.293, le200: 0.427, le300: null}
+};
+const metlifeMaxBenefit = 10000;
+const websuranceMaxBenefit = 8333;
+
+// ---- Voluntary LTD rate factors (per $100 of monthly covered payroll), age-banded ----
+const metlifeVoluntary = {
+  white: {u35:0.134, b35_39:0.415, b40_44:0.727, b45_49:0.996, b50_54:1.411, b55_59:1.647, b60_64:1.424, o65:0.718},
+  grey:  {u35:0.158, b35_39:0.487, b40_44:0.854, b45_49:1.171, b50_54:1.658, b55_59:1.935, b60_64:1.673, o65:0.843},
+  blue:  {u35:0.207, b35_39:0.641, b40_44:1.122, b45_49:1.539, b50_54:2.18,  b55_59:2.545, b60_64:2.199, o65:1.109}
+};
+const websuranceVoluntary = {
+  white: {u30:0.31, b30_34:0.31, b35_39:0.67, b40_44:0.91, b45_49:1.24, b50_54:1.66, b55_59:1.9,  b60_64:1.48, o65:0.56},
+  grey:  {u30:0.36, b30_34:0.36, b35_39:0.77, b40_44:1.05, b45_49:1.43, b50_54:1.91, b55_59:2.18, b60_64:1.7,  o65:0.64},
+  blue:  {u30:0.44, b30_34:0.44, b35_39:0.93, b40_44:1.28, b45_49:1.74, b50_54:2.32, b55_59:2.65, b60_64:2.07, o65:0.78}
+};
+
+// ---- Sun Life (TAA) - flat structure by role, no age/collar-class bands ----
+const sunLifeTAA = {
+  staff: {rate:0.54,  maxIncome:150000, maxBenefit:7500},
+  agent: {rate:0.607, maxIncome:400000, maxBenefit:20000}
+};
+
+function calcAge(dobStr){
+  if(!dobStr) return null;
+  const dob = new Date(dobStr);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if(m < 0 || (m===0 && today.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+function metlifeGroupBand(salary){ return salary <= 200000 ? 'le200' : 'gt200'; }
+function websuranceGroupBand(salary){
+  if(salary <= 100000) return 'le100';
+  if(salary <= 200000) return 'le200';
+  return 'le300';
+}
+function metlifeAgeBand(age){
+  if(age < 35) return 'u35';
+  if(age <= 39) return 'b35_39';
+  if(age <= 44) return 'b40_44';
+  if(age <= 49) return 'b45_49';
+  if(age <= 54) return 'b50_54';
+  if(age <= 59) return 'b55_59';
+  if(age <= 64) return 'b60_64';
+  return 'o65';
+}
+function websuranceAgeBand(age){
+  if(age < 30) return 'u30';
+  if(age <= 34) return 'b30_34';
+  if(age <= 39) return 'b35_39';
+  if(age <= 44) return 'b40_44';
+  if(age <= 49) return 'b45_49';
+  if(age <= 54) return 'b50_54';
+  if(age <= 59) return 'b55_59';
+  if(age <= 64) return 'b60_64';
+  return 'o65';
+}
+
+function runCompare(){
+  const dob = document.getElementById('dob').value;
+  const salary = parseFloat(document.getElementById('salary').value) || 0;
+  const ltdType = document.getElementById('ltdType').value;
+  const collarClass = document.getElementById('collarClass').value;
+  const taaRole = document.getElementById('taaRole').value;
+  const age = calcAge(dob);
+
+  document.getElementById('outAge').textContent = age!==null ? age : '–';
+  document.getElementById('outSalary').textContent = salary ? '$'+salary.toLocaleString() : '–';
+  document.getElementById('outType').textContent = ltdType==='group' ? 'Group' : 'Voluntary';
+  document.getElementById('outClass').textContent = collarClass.charAt(0).toUpperCase()+collarClass.slice(1);
+  document.getElementById('outRole').textContent = taaRole==='staff' ? 'Agency Staff' : 'Agent';
+
+  const monthlySalary = salary / 12;
+  const rows = [];
+
+  // MetLife
+  let mlRate;
+  if(ltdType==='group'){
+    const band = metlifeGroupBand(salary);
+    mlRate = metlifeGroup[collarClass][band];
+  } else {
+    if(age===null){
+      mlRate = undefined;
+    } else {
+      const band = metlifeAgeBand(age);
+      mlRate = metlifeVoluntary[collarClass][band];
+    }
+  }
+  if(mlRate === null || mlRate === undefined){
+    rows.push({carrier:'MetLife', basis: ltdType==='group' ? 'Rate not published for this band/class' : 'Enter DOB', rate:null, benefit:null});
+  } else {
+    const premium = monthlySalary * mlRate / 100;
+    const benefit = Math.min(monthlySalary * 0.6, metlifeMaxBenefit);
+    rows.push({carrier:'MetLife', basis: ltdType==='group' ? 'Salary band, ' + collarClass : 'Age band, ' + collarClass, rate: premium, benefit});
+  }
+
+  // Websurance
+  let wsRate;
+  if(ltdType==='group'){
+    const band = websuranceGroupBand(salary);
+    wsRate = websuranceGroup[collarClass][band];
+  } else {
+    if(age===null){
+      wsRate = undefined;
+    } else {
+      const band = websuranceAgeBand(age);
+      wsRate = websuranceVoluntary[collarClass][band];
+    }
+  }
+  if(wsRate === null || wsRate === undefined){
+    rows.push({carrier:'Websurance (AMFAM)', basis: ltdType==='group' ? 'Rate not published for this band/class' : 'Enter DOB', rate:null, benefit:null});
+  } else {
+    const premium = monthlySalary * wsRate / 100;
+    const benefit = Math.min(monthlySalary * 0.6, websuranceMaxBenefit);
+    rows.push({carrier:'Websurance (AMFAM)', basis: ltdType==='group' ? 'Salary band, ' + collarClass : 'Age band, ' + collarClass, rate: premium, benefit});
+  }
+
+  // Sun Life (TAA)
+  const sl = sunLifeTAA[taaRole];
+  const cappedSalary = Math.min(salary, sl.maxIncome);
+  const slPremium = cappedSalary * sl.rate / 1200;
+  const slBenefit = Math.min(cappedSalary/12*0.6, sl.maxBenefit);
+  rows.push({carrier:'Sun Life (TAA)', basis: 'Flat rate, ' + (taaRole==='staff'?'Agency Staff':'Agent') + (salary > sl.maxIncome ? ' (income capped at $'+sl.maxIncome.toLocaleString()+')' : ''), rate: slPremium, benefit: slBenefit});
+
+  const validRates = rows.filter(r=>r.rate!==null).map(r=>r.rate);
+  const min = validRates.length ? Math.min(...validRates) : null;
+
+  const tbody = document.getElementById('rateBody');
+  tbody.innerHTML = '';
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    if(r.rate===null){
+      tr.className = 'unavailable';
+      tr.innerHTML = `<td>${r.carrier}</td><td>${r.basis}</td><td class="rate">—<span class="badge na">N/A</span></td><td class="benefit">—</td>`;
+    } else {
+      if(r.rate===min) tr.className='lowest';
+      let badge = '';
+      if(r.rate===min) badge = '<span class="badge best">Lowest</span>';
+      if(r.carrier.startsWith('Websurance')) badge += '<span class="badge legacy">Migrating away</span>';
+      tr.innerHTML = `<td>${r.carrier}</td><td>${r.basis}</td><td class="rate">$${r.rate.toFixed(2)}${badge}</td><td class="benefit">$${r.benefit.toLocaleString(undefined,{maximumFractionDigits:0})}/mo</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('dataNote').innerHTML =
+    '<strong>Assumptions to confirm:</strong> benefit shown assumes the standard 60% of monthly salary, capped at each carrier\\u2019s published max monthly benefit (MetLife $10,000 / Websurance $8,333 / Sun Life $7,500 Staff or $20,000 Agent) \\u2014 Voluntary plans normally let the employee elect a specific benefit amount, which isn\\u2019t captured here. MetLife\\u2019s Grey/Blue collar rates for the $200,000.01\\u2013$300K band and Websurance\\u2019s Grey/Blue rates for the $201K\\u2013$300K band are not published in the source comparison file (only White collar is). Sun Life (TAA) has no separate Group/Voluntary structure or collar-class rating \\u2014 it always uses the single Staff/Agent flat rate shown above regardless of the LTD Type selected.';
+
+  document.getElementById('results').style.display = 'block';
+}
+</script>
+</body>
+</html>
