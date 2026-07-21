@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ACA Coverage Estimator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+:root{
+  --paper:#EEF1F1;
+  --panel:#FFFFFF;
+  --ink:#16233A;
+  --ink-soft:#4A5A70;
+  --line:#D6DCE0;
+  --teal:#0F6E8C;
+  --teal-deep:#0A4F63;
+  --amber:#B8860B;
+  --red:#B23A3A;
+  --green:#2F7A4D;
+  --band-100:#C9D8DC;
+  --band-cliff:#E7C9C9;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Sans',sans-serif;
+  padding:28px;
+}
+.wrap{max-width:1080px;margin:0 auto;}
+.masthead{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  border-bottom:2px solid var(--ink);
+  padding-bottom:14px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.masthead h1{
+  font-size:22px;
+  font-weight:700;
+  margin:0 0 4px 0;
+  letter-spacing:0.2px;
+}
+.masthead p{
+  margin:0;
+  color:var(--ink-soft);
+  font-size:13px;
+}
+.masthead .tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--teal-deep);
+  background:#DCEBEF;
+  border:1px solid #BEDBE2;
+  padding:3px 8px;
+  border-radius:3px;
+  white-space:nowrap;
+}
+.grid{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  gap:20px;
+}
+@media (max-width:820px){ .grid{grid-template-columns:1fr;} }
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:18px 20px;
+}
+.panel h2{
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+  color:var(--ink-soft);
+  margin:0 0 14px 0;
+  font-weight:600;
+}
+label{
+  display:block;
+  font-size:12.5px;
+  font-weight:600;
+  margin:12px 0 4px 0;
+  color:var(--ink);
+}
+label:first-of-type{margin-top:0;}
+select,input[type=number]{
+  width:100%;
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:14px;
+  padding:8px 9px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:#FCFDFD;
+  color:var(--ink);
+}
+select:focus,input:focus{outline:2px solid var(--teal);outline-offset:1px;}
+.hint{font-size:11px;color:var(--ink-soft);margin-top:3px;}
+
+.members{margin-top:6px;}
+.member-row{
+  display:grid;
+  grid-template-columns:1fr 78px auto;
+  gap:8px;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px dashed var(--line);
+}
+.member-row:first-child{border-top:1px dashed var(--line);}
+.member-row input[type=number]{padding:6px 8px;font-size:13px;}
+.tob-check{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+.member-remove{
+  background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;
+}
+.add-member{
+  margin-top:10px;
+  width:100%;
+  background:#fff;
+  border:1px dashed var(--teal);
+  color:var(--teal-deep);
+  font-weight:600;
+  font-size:12.5px;
+  padding:8px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.add-member:hover{background:#F1F8FA;}
+
+.calc-btn{
+  margin-top:18px;
+  width:100%;
+  background:var(--ink);
+  color:#fff;
+  border:none;
+  padding:12px;
+  font-size:14px;
+  font-weight:600;
+  border-radius:4px;
+  cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif;
+}
+.calc-btn:hover{background:var(--teal-deep);}
+
+.results-empty{
+  color:var(--ink-soft);
+  font-size:13.5px;
+  padding:30px 10px;
+  text-align:center;
+}
+.gauge-wrap{margin-bottom:22px;}
+.gauge-label-row{
+  display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;flex-wrap:wrap;gap:8px;
+}
+.gauge-label-row .fpl-num{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:26px;
+  font-weight:700;
+}
+.gauge-label-row .fpl-num span{font-size:14px;font-weight:500;color:var(--ink-soft);}
+.gauge-status{
+  font-size:12.5px;
+  font-weight:600;
+  padding:3px 9px;
+  border-radius:12px;
+}
+.status-medicaid{background:#DCEBEF;color:var(--teal-deep);}
+.status-subsidy{background:#DCEEE1;color:var(--green);}
+.status-cliffzone{background:#FBEAD2;color:var(--amber);}
+.status-nosubsidy{background:#F5DCDC;color:var(--red);}
+
+.gauge-track{
+  position:relative;
+  height:34px;
+  background:linear-gradient(to right, var(--band-100) 0 22.2%, #D7E6D9 22.2% 88.9%, var(--band-cliff) 88.9% 100%);
+  border-radius:4px;
+  border:1px solid var(--line);
+  margin-bottom:6px;
+}
+.gauge-marker{
+  position:absolute;top:-7px;width:3px;height:48px;background:var(--ink);
+}
+.gauge-marker::after{
+  content:'';
+  position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+  border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:7px solid var(--ink);
+}
+.gauge-tick-wrap{position:relative;height:14px;}
+.gauge-tick-label{
+  position:absolute;top:0;font-size:10px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;
+  transform:translateX(-50%);
+}
+.gauge-footnote{font-size:11px;color:var(--ink-soft);margin-top:18px;}
+
+.stat-row{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  margin:20px 0;
+}
+.stat{
+  background:#F7F9F9;
+  border:1px solid var(--line);
+  border-radius:5px;
+  padding:10px 12px;
+}
+.stat .k{font-size:10.5px;text-transform:uppercase;letter-spacing:0.4px;color:var(--ink-soft);font-weight:600;}
+.stat .v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;margin-top:3px;}
+
+table.tiers{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:6px;
+  font-size:13px;
+}
+table.tiers th{
+  text-align:left;
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:0.4px;
+  color:var(--ink-soft);
+  border-bottom:2px solid var(--ink);
+  padding:6px 8px;
+  font-weight:600;
+}
+table.tiers td{
+  padding:9px 8px;
+  border-bottom:1px solid var(--line);
+  font-family:'IBM Plex Mono',monospace;
+}
+table.tiers tr.benchmark td{background:#F1F8FA;}
+table.tiers td.tier-name{font-family:'IBM Plex Sans',sans-serif;font-weight:600;}
+table.tiers td.num{text-align:right;}
+
+.disclaimer{
+  margin-top:22px;
+  font-size:11.5px;
+  line-height:1.5;
+  color:var(--ink-soft);
+  border-top:1px solid var(--line);
+  padding-top:12px;
+}
+.disclaimer b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>ACA Coverage Estimator</h1>
+      <p>Illustrative marketplace subsidy &amp; premium estimate for anonymous household profiles</p>
+    </div>
+    <div class="tag">2026 PLAN YEAR &middot; ORIGINAL ACA RULES</div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Household Profile</h2>
+
+      <label for="state">State</label>
+      <select id="state"></select>
+      <div class="hint">Used to look up the average benchmark (2nd-lowest silver) premium.</div>
+
+      <label for="income">Annual household income (MAGI)</label>
+      <input type="number" id="income" placeholder="e.g. 54000" min="0" step="500">
+
+      <div class="members" id="memberList"></div>
+      <button class="add-member" id="addMember" type="button">+ Add household member</button>
+
+      <button class="calc-btn" id="calcBtn" type="button">Estimate coverage</button>
+    </div>
+
+    <div class="panel" id="resultsPanel">
+      <h2>Estimate</h2>
+      <div class="results-empty" id="emptyState">Fill in the household profile and click <b>Estimate coverage</b>.</div>
+      <div id="resultsBody" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <b>How this estimate is built:</b> Federal poverty guidelines and IRS applicable-percentage table are exact (2025 HHS guidelines &amp; Rev. Proc. 2025-25, used for 2026 plan-year coverage). The benchmark premium is a <b>state-level average</b> second-lowest-cost silver premium for a 40-year-old (KFF analysis of CMS QHP Rate/Landscape data), age-adjusted using the federal default 3:1 age curve &mdash; not an actual county-level quote. Metal-tier prices use typical national ratios to the benchmark silver plan. Real premiums vary by county, carrier, and plan; cost-sharing reductions, state-based marketplace subsidies (CA/NJ/NY/MA/VT/WA), and non-expansion Medicaid gap rules are not modeled. This tool is for directional planning only &mdash; not a quote, and not tax or legal advice.
+  </div>
+</div>
+
+<script>
+const STATE_BENCHMARK = {
+"Alabama":645,"Alaska":1032,"Arizona":532,"Arkansas":774,"California":570,"Colorado":557,
+"Connecticut":870,"Delaware":691,"District of Columbia":610,"Florida":683,"Georgia":615,
+"Hawaii":541,"Idaho":490,"Illinois":646,"Indiana":474,"Iowa":501,"Kansas":670,"Kentucky":590,
+"Louisiana":646,"Maine":709,"Maryland":414,"Massachusetts":494,"Michigan":523,"Minnesota":448,
+"Mississippi":662,"Missouri":605,"Montana":692,"Nebraska":710,"Nevada":497,"New Hampshire":401,
+"New Jersey":545,"New Mexico":623,"New York":817,"North Carolina":638,"North Dakota":570,
+"Ohio":513,"Oklahoma":604,"Oregon":543,"Pennsylvania":572,"Rhode Island":506,"South Carolina":564,
+"South Dakota":655,"Tennessee":711,"Texas":661,"Utah":640,"Vermont":1299,"Virginia":455,
+"Washington":612,"West Virginia":1073,"Wisconsin":611,"Wyoming":1090
+};
+
+const AGE_CURVE = {};
+(function(){
+  for(let a=0;a<=14;a++) AGE_CURVE[a]=0.765;
+  const teens=[0.833,0.859,0.885,0.913,0.941,0.970];
+  for(let a=15;a<=20;a++) AGE_CURVE[a]=teens[a-15];
+  for(let a=21;a<=24;a++) AGE_CURVE[a]=1.000;
+  const adult=[1.004,1.024,1.048,1.087,1.119,1.135,1.159,1.183,1.198,1.214,1.222,1.230,1.238,1.246,
+    1.262,1.278,1.302,1.325,1.357,1.397,1.444,1.500,1.563,1.635,1.706,1.786,1.865,1.952,2.040,2.135,
+    2.230,2.333,2.437,2.548,2.603,2.714,2.810,2.873,2.952];
+  for(let a=25;a<=63;a++) AGE_CURVE[a]=adult[a-25];
+  for(let a=64;a<=99;a++) AGE_CURVE[a]=3.000;
+})();
+
+const FPL = {
+  "48": {base:15650, incr:5500},
+  "AK": {base:19550, incr:6880},
+  "HI": {base:17990, incr:6330}
+};
+
+function applicablePct(fplPercent){
+  if(fplPercent < 100) return null;
+  if(fplPercent < 133) return 0.0210;
+  if(fplPercent < 150) return lerp(fplPercent,133,150,0.0314,0.0419);
+  if(fplPercent < 200) return lerp(fplPercent,150,200,0.0419,0.0660);
+  if(fplPercent < 250) return lerp(fplPercent,200,250,0.0660,0.0844);
+  if(fplPercent < 300) return lerp(fplPercent,250,300,0.0844,0.0996);
+  if(fplPercent <= 400) return 0.0996;
+  return null;
+}
+function lerp(x,x0,x1,y0,y1){ return y0 + (y1-y0)*(x-x0)/(x1-x0); }
+
+const TIER_RATIOS = [
+  {name:"Bronze (lowest cost)", ratio:0.75},
+  {name:"Silver (lowest cost)", ratio:0.97},
+  {name:"Silver (benchmark)", ratio:1.00, benchmark:true},
+  {name:"Gold (lowest cost)", ratio:1.18},
+  {name:"Platinum (lowest cost)", ratio:1.32}
+];
+
+const stateSel = document.getElementById('state');
+Object.keys(STATE_BENCHMARK).sort().forEach(function(s){
+  const opt=document.createElement('option');
+  opt.value=s; opt.textContent=s;
+  stateSel.appendChild(opt);
+});
+stateSel.value="New York";
+
+const memberList = document.getElementById('memberList');
+function addMember(age, tobacco){
+  const row=document.createElement('div');
+  row.className='member-row';
+  row.innerHTML=
+    '<div><input type="number" min="0" max="120" class="m-age" value="'+(age!==undefined?age:'')+'" placeholder="Age"></div>'+
+    '<label class="tob-check"><input type="checkbox" class="m-tob" '+(tobacco?'checked':'')+'> Smoker</label>'+
+    '<button class="member-remove" type="button" title="Remove">&times;</button>';
+  row.querySelector('.member-remove').addEventListener('click',function(){ row.remove(); });
+  memberList.appendChild(row);
+}
+document.getElementById('addMember').addEventListener('click',function(){ addMember(); });
+addMember(40,false);
+
+document.getElementById('calcBtn').addEventListener('click', runCalculation);
+
+function runCalculation(){
+  const state = stateSel.value;
+  const income = parseFloat(document.getElementById('income').value);
+  const ageRows = Array.from(document.querySelectorAll('.member-row'));
+  const members = ageRows.map(function(r){
+    return {
+      age: parseInt(r.querySelector('.m-age').value,10),
+      tobacco: r.querySelector('.m-tob').checked
+    };
+  }).filter(function(m){ return !isNaN(m.age); });
+
+  const emptyState=document.getElementById('emptyState');
+  const body=document.getElementById('resultsBody');
+
+  if(!income || income<=0 || members.length===0){
+    emptyState.style.display='block';
+    emptyState.textContent='Enter household income and at least one household member with an age, then click Estimate coverage.';
+    body.style.display='none';
+    return;
+  }
+  emptyState.style.display='none';
+  body.style.display='block';
+
+  const householdSize = members.length;
+  const region = state==="Alaska" ? "AK" : state==="Hawaii" ? "HI" : "48";
+  const fplTable = FPL[region];
+  const fpl100 = fplTable.base + fplTable.incr*(householdSize-1);
+  const fplPct = (income/fpl100)*100;
+
+  const benchmark40 = STATE_BENCHMARK[state];
+  const baseRate21 = benchmark40 / AGE_CURVE[40];
+
+  const adults = members.filter(function(m){ return m.age>=21; });
+  const minors = members.filter(function(m){ return m.age<21; }).sort(function(a,b){ return b.age-a.age; }).slice(0,3);
+  const billedMembers = adults.concat(minors);
+
+  let monthlyBenchmarkTotal = 0;
+  billedMembers.forEach(function(m){
+    const factor = AGE_CURVE[Math.min(m.age,64)] || 1.0;
+    let memberRate = baseRate21 * factor;
+    if(m.tobacco && m.age>=21) memberRate *= 1.5;
+    monthlyBenchmarkTotal += memberRate;
+  });
+  const annualBenchmark = monthlyBenchmarkTotal*12;
+
+  const appPct = applicablePct(fplPct);
+  let annualContribution=null, annualPTC=null;
+  if(appPct!==null){
+    annualContribution = income*appPct;
+    annualPTC = Math.max(0, annualBenchmark - annualContribution);
+  }
+
+  renderResults({state:state,income:income,householdSize:householdSize,fplPct:fplPct,fpl100:fpl100,
+    appPct:appPct,annualContribution:annualContribution,annualBenchmark:annualBenchmark,
+    annualPTC:annualPTC,monthlyBenchmarkTotal:monthlyBenchmarkTotal});
+}
+
+function fmt(n){ return '$'+Math.round(n).toLocaleString(); }
+
+function renderResults(r){
+  const body=document.getElementById('resultsBody');
+
+  let statusClass, statusText;
+  if(r.fplPct<100){ statusClass='status-medicaid'; statusText='Below 100% FPL — likely Medicaid range'; }
+  else if(r.fplPct>400){ statusClass='status-nosubsidy'; statusText='Above 400% FPL — no premium tax credit'; }
+  else if(r.fplPct>=370){ statusClass='status-cliffzone'; statusText='Near the 400% cliff'; }
+  else { statusClass='status-subsidy'; statusText='Eligible for premium tax credit'; }
+
+  const clamped = Math.max(0, Math.min(r.fplPct, 450));
+  const markerPct = (clamped/450)*100;
+
+  const gaugeHtml =
+    '<div class="gauge-wrap">'+
+      '<div class="gauge-label-row">'+
+        '<div class="fpl-num">'+r.fplPct.toFixed(0)+'% <span>of federal poverty level</span></div>'+
+        '<div class="gauge-status '+statusClass+'">'+statusText+'</div>'+
+      '</div>'+
+      '<div class="gauge-track"><div class="gauge-marker" style="left:'+markerPct+'%;"></div></div>'+
+      '<div class="gauge-tick-wrap">'+
+        '<div class="gauge-tick-label" style="left:'+((100/450)*100)+'%;">100%</div>'+
+        '<div class="gauge-tick-label" style="left:'+((400/450)*100)+'%;">400% cliff</div>'+
+      '</div>'+
+    '</div>';
+
+  const statHtml =
+    '<div class="stat-row">'+
+      '<div class="stat"><div class="k">Household income</div><div class="v">'+fmt(r.income)+'</div></div>'+
+      '<div class="stat"><div class="k">100% FPL, size '+r.householdSize+'</div><div class="v">'+fmt(r.fpl100)+'</div></div>'+
+      '<div class="stat"><div class="k">Required contribution</div><div class="v">'+(r.annualContribution!==null?fmt(r.annualContribution)+'/yr':'&mdash;')+'</div></div>'+
+    '</div>';
+
+  let tierRows='';
+  TIER_RATIOS.forEach(function(t){
+    const annualGross = r.annualBenchmark*t.ratio;
+    const annualNet = r.annualPTC!==null ? Math.max(0, annualGross - r.annualPTC) : annualGross;
+    tierRows += '<tr class="'+(t.benchmark?'benchmark':'')+'">'+
+      '<td class="tier-name">'+t.name+'</td>'+
+      '<td class="num">'+fmt(annualGross/12)+'</td>'+
+      '<td class="num">'+(r.annualPTC!==null?fmt(r.annualPTC/12):'—')+'</td>'+
+      '<td class="num">'+fmt(annualNet/12)+'</td>'+
+    '</tr>';
+  });
+
+  const tableHtml =
+    '<table class="tiers">'+
+      '<thead><tr><th>Metal tier</th><th style="text-align:right;">Full premium /mo</th><th style="text-align:right;">Subsidy /mo</th><th style="text-align:right;">Net cost /mo</th></tr></thead>'+
+      '<tbody>'+tierRows+'</tbody>'+
+    '</table>'+
+    '<div class="gauge-footnote">Benchmark (2nd-lowest silver) age-adjusted annual premium for this household: '+fmt(r.annualBenchmark)+' — full-price monthly equivalent '+fmt(r.monthlyBenchmarkTotal)+'.</div>';
+
+  body.innerHTML = gaugeHtml + statHtml + tableHtml;
+}
+</script>
+</body>
+</html>
