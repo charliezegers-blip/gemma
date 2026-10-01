@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nature Center Revenue Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: results column on the left, sticky assumptions panel on the right; one column on phones. */
+:root{
+  --bg:#F1F5F2; --surface:#FBFCFB; --ink:#15251E; --ink2:#46564E; --muted:#66756E; --line:#D7DFDA; --soft:#E7EDE9;
+  --accent:#1B5E45; --accent-ink:#FFFFFF;
+  --good:#17703F; --good-bg:#DDF0E4; --bad:#A93A1B; --bad-bg:#F8E1D9;
+  --c-adm:#1F72B5; --c-don:#D69A00; --c-mem:#1E8A5C; --c-evt:#8A5FB0; --c-park:#D2502F;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1613; --surface:#17201C; --ink:#E6EEE9; --ink2:#AAB9B1; --muted:#8B9B93; --line:#2A3731; --soft:#202C27;
+    --accent:#5CC596; --accent-ink:#0A1A12;
+    --good:#6FD39C; --good-bg:#17382A; --bad:#F09A7F; --bad-bg:#40221A;
+    --c-adm:#4A94D8; --c-don:#BF8E0E; --c-mem:#2FA06E; --c-evt:#A184D0; --c-park:#E2593C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1613; --surface:#17201C; --ink:#E6EEE9; --ink2:#AAB9B1; --muted:#8B9B93; --line:#2A3731; --soft:#202C27;
+  --accent:#5CC596; --accent-ink:#0A1A12;
+  --good:#6FD39C; --good-bg:#17382A; --bad:#F09A7F; --bad-bg:#40221A;
+  --c-adm:#4A94D8; --c-don:#BF8E0E; --c-mem:#2FA06E; --c-evt:#A184D0; --c-park:#E2593C;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);padding-inline:clamp(16px,3vw,32px);padding-block:24px 56px;font-variant-numeric:tabular-nums}
+.wrap{max-width:1280px;margin-inline:auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(26px,4vw,38px);font-weight:700;letter-spacing:-.01em;max-width:24ch}
+h2{font-size:19px;font-weight:600}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.lede{color:var(--ink2);max-width:62ch}
+header{display:flex;flex-direction:column;gap:10px}
+.banner{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:10px 14px;color:var(--ink2);font-size:14px;max-width:80ch}
+.banner b{color:var(--ink)}
+.bar{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+.ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ctl>span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:14px;font-weight:500;border:0;background:transparent;color:var(--ink2);padding:7px 14px;cursor:pointer;min-height:36px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.jump{font-size:14px;color:var(--accent);font-weight:500}
+.layout{display:grid;gap:24px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1040px){.layout{grid-template-columns:minmax(0,1fr) 340px;align-items:start}.jump{display:none}}
+.main{display:flex;flex-direction:column;gap:24px;min-width:0}
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .desc{font-size:13px;color:var(--muted);min-height:2.8em}
+.big{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.01em;margin-top:6px}
+.lbl{font-size:12px;color:var(--muted)}
+.delta{display:inline-flex;align-self:flex-start;gap:6px;align-items:center;font-size:13px;font-weight:600;padding:3px 9px;border-radius:99px;margin-top:6px}
+.delta.good{background:var(--good-bg);color:var(--good)}
+.delta.bad{background:var(--bad-bg);color:var(--bad)}
+.delta.flat{background:var(--soft);color:var(--ink2)}
+.cum{font-size:13px;color:var(--ink2);margin-top:4px}
+.cum b{font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel .sub{color:var(--muted);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.chartwrap{position:relative;width:100%}
+#chart{display:block;width:100%}
+#chart text{font-family:var(--body);fill:var(--ink2);font-size:12px}
+#chart .tot{fill:var(--ink);font-weight:600;font-size:12.5px}
+#chart .grid{stroke:var(--line);stroke-width:1}
+#chart rect.seg-r{stroke:var(--surface);stroke-width:2}
+#chart rect.seg-r:hover{opacity:.82}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:7px 10px;border-radius:6px;font-size:12.5px;line-height:1.35;max-width:220px;opacity:0;transition:opacity .08s;z-index:3}
+.tip b{font-weight:600}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-weight:600;color:var(--ink2);font-size:12.5px}
+tr.total td{font-weight:600;border-top:2px solid var(--line)}
+tr.sum td{background:var(--soft);font-weight:600}
+td.pos{color:var(--good)}td.neg{color:var(--bad)}
+.read{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.read>div{border-top:2px solid var(--accent);padding-top:10px;display:flex;flex-direction:column;gap:4px}
+.read .k{font-family:var(--display);font-size:24px;font-weight:700}
+.read p{font-size:14px;color:var(--ink2)}
+.mx td,.mx th{text-align:center}
+.mx th:first-child,.mx td:first-child{text-align:left}
+.mx td.cellv{font-weight:600}
+.mx td.pos{background:var(--good-bg)}.mx td.neg{background:var(--bad-bg)}
+aside{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (min-width:1040px){aside{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;padding-right:4px}}
+fieldset{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:0;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+legend{font-family:var(--display);font-weight:600;font-size:15px;padding:0 6px}
+.field{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:2px 10px;align-items:center}
+.field label{font-size:13.5px;color:var(--ink)}
+.field .h{grid-column:1/-1;font-size:12px;color:var(--muted)}
+.inp{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding-inline:8px;min-height:36px}
+.inp:focus-within{border-color:var(--accent)}
+.inp input{width:100%;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;text-align:right;padding:6px 0;min-width:0;outline-offset:6px}
+.inp span{color:var(--muted);font-size:13px}
+.inp span.pre{margin-right:4px}.inp span.suf{margin-left:4px}
+.reset{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:8px 12px;cursor:pointer;align-self:flex-start}
+.note{font-size:12.5px;color:var(--muted)}
+.qs{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;color:var(--ink2);font-size:14px}
+.qs b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Nature Center at Greenburgh · Marketing Committee</div>
+    <h1>What happens to revenue if we change how visitors pay?</h1>
+    <p class="lede">Compare three ways of charging for the animal museum, with or without a parking fee, over three years. Change any assumption and every number updates.</p>
+    <p class="banner"><b>Example numbers.</b> Every figure here is a placeholder so the model has something to show. Replace them in the assumptions panel with the Center's real attendance, prices, memberships and event results before drawing conclusions.</p>
+    <div class="bar">
+      <div class="ctl"><span id="lp">Parking fee</span>
+        <div class="seg" role="group" aria-labelledby="lp"><button id="pOff" aria-pressed="true">Off</button><button id="pOn" aria-pressed="false">On</button></div></div>
+      <div class="ctl"><span id="ly">Show year</span>
+        <div class="seg" role="group" aria-labelledby="ly"><button data-y="1" aria-pressed="false">1</button><button data-y="2" aria-pressed="false">2</button><button data-y="3" aria-pressed="true">3</button></div></div>
+      <a class="jump" href="#assume">Edit assumptions ↓</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="main">
+      <section class="cards" id="cards" aria-label="Scenario summaries"></section>
+
+      <section class="panel">
+        <div><h2 id="chartTitle">Where the money comes from</h2>
+        <p class="sub" id="chartSub"></p></div>
+        <div class="legend" id="legend"></div>
+        <div class="chartwrap" id="cw"><svg id="chart" role="img" aria-label="Stacked bar chart of revenue by source for each scenario. A table with the same numbers follows."></svg><div class="tip" id="tip"></div></div>
+      </section>
+
+      <section class="panel">
+        <h2>Three-year result for every combination</h2>
+        <p class="sub">Cumulative net revenue over Years 1 to 3, compared with keeping everything as it is today. Net means revenue minus the new costs of each option.</p>
+        <div class="scroll"><table class="mx" id="matrix"></table></div>
+      </section>
+
+      <section class="panel">
+        <h2>What to watch</h2>
+        <div class="read" id="read"></div>
+      </section>
+
+      <section class="panel">
+        <h2 id="parkTitle">How the parking fee interacts with each option</h2>
+        <p class="sub" id="parkSub"></p>
+        <div class="scroll"><table id="parkTable"></table></div>
+      </section>
+
+      <section class="panel">
+        <h2 id="tblTitle">The numbers</h2>
+        <div class="scroll"><table id="tbl"></table></div>
+      </section>
+
+      <section class="panel">
+        <h2>Decisions the board will need to make together</h2>
+        <ol class="qs">
+          <li><b>Do members still get something at the door?</b> If entry is free for everyone, the membership pitch loses its most concrete benefit. Test this with the membership change in Option C.</li>
+          <li><b>Who pays for parking?</b> Member discounts protect renewals but cut parking income. Event guests are often the largest parking group.</li>
+          <li><b>Does a parking charge dampen giving?</b> Visitors who pay to park may feel they have already paid. The donation fatigue setting lets you test that.</li>
+          <li><b>What does the museum cost to open?</b> Admission pays for animal care. Free entry only works if donations cover that same cost.</li>
+        </ol>
+      </section>
+    </div>
+
+    <aside id="assume" aria-label="Assumptions">
+      <button class="reset" id="reset">Reset to example numbers</button>
+      <p class="note" id="saveNote">Changes stay in this browser only.</p>
+      <div id="fields"></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const DEF={
+  nonMemberVisits:14000, avgTicket:6, memberHH:450, dues:65, visitsPerMember:9, eventRev:90000, eventAttendees:5000,
+  visitorGrowth:2, memberGrowth:3, eventGrowth:3, phase1:70,
+  bPart:15, bGift:8, bAtt:0, bMem:0, bCost:2000,
+  cPart:40, cGift:5, cAtt:20, cMem:-15, cCost:-6000,
+  pFee:5, pPPV:3, pCar:90, pMemDisc:50, pDrop:-5, pEventDrop:-2, pFatigue:15, pOp:12000, pSetup:15000
+};
+const SCHEMA=[
+ {t:'Today’s baseline',items:[
+  ['nonMemberVisits','Paid museum visits a year','#','People who are not members'],
+  ['avgTicket','Average admission per visit','$','Blend of adult, child and senior prices'],
+  ['memberHH','Member households','#',''],
+  ['dues','Average annual dues','$',''],
+  ['visitsPerMember','Visits per member household a year','#','Counted in people'],
+  ['eventRev','Special events revenue a year','$','Tickets, sponsors and sales'],
+  ['eventAttendees','Event attendees a year','#','Used for parking']]},
+ {t:'Growth and rollout',items:[
+  ['visitorGrowth','Yearly growth in visits','%','Before any change'],
+  ['memberGrowth','Yearly growth in members','%',''],
+  ['eventGrowth','Yearly growth in events','%',''],
+  ['phase1','Share of the effect felt in Year 1','%','Full effect from Year 2']]},
+ {t:'Option B: donation plus admission',items:[
+  ['bPart','Visitors who give','%','Share of paying visitors'],
+  ['bGift','Average gift','$',''],
+  ['bAtt','Change in visits','%','Positive means more visitors'],
+  ['bMem','Change in members','%',''],
+  ['bCost','Added yearly cost','$','Signage, kiosk, processing']]},
+ {t:'Option C: donation replaces admission',items:[
+  ['cPart','Visitors who give','%',''],
+  ['cGift','Average gift','$',''],
+  ['cAtt','Change in visits','%','Lower barrier to entry'],
+  ['cMem','Change in members','%','Negative if free entry weakens membership'],
+  ['cCost','Change in yearly cost','$','Negative means savings, such as less cash handling']]},
+ {t:'Parking fee',items:[
+  ['pFee','Fee per vehicle','$',''],
+  ['pPPV','People per vehicle','#',''],
+  ['pCar','Visitors who arrive by car','%',''],
+  ['pMemDisc','Member discount on the fee','%','100 means members park free'],
+  ['pDrop','Change in visits from the fee','%','Negative means fewer visitors'],
+  ['pEventDrop','Change in event revenue from the fee','%',''],
+  ['pFatigue','Drop in donations when parking is charged','%','Relative, applies to Options B and C'],
+  ['pOp','Yearly cost to run parking','$','Staff, signs, payment system'],
+  ['pSetup','One-time setup cost','$','Charged in Year 1']]}
+];
+let A={...DEF}, yr=3, park=false, R={};
+try{const s=localStorage.getItem('ncgb-model-v1');if(s){const o=JSON.parse(s);for(const k in DEF)if(typeof o[k]==='number')A[k]=o[k];}}catch(e){}
+function save(){try{localStorage.setItem('ncgb-model-v1',JSON.stringify(A));}catch(e){}}
+
+const SC={sq:'Status quo',b:'Donation + admission',c:'Donation replaces admission'};
+const SCLINES={sq:['Status quo'],b:['Donation +','admission'],c:['Donation','only'],today:['Today']};
+const DESC={sq:'Paid museum admission, events and membership as they are now.',b:'Admission stays. Visitors are also asked for a suggested gift.',c:'Museum entry becomes pay what you wish. No fixed ticket price.'};
+const STREAMS=[['adm','Museum admission'],['don','Suggested donations'],['mem','Membership'],['evt','Special events'],['park','Parking fees']];
+
+function run(key,withPark){
+  const a=A,o=[];
+  const s={sq:{price:a.avgTicket,part:0,gift:0,att:0,mem:0,cost:0},
+    b:{price:a.avgTicket,part:a.bPart/100,gift:a.bGift,att:a.bAtt/100,mem:a.bMem/100,cost:a.bCost},
+    c:{price:0,part:a.cPart/100,gift:a.cGift,att:a.cAtt/100,mem:a.cMem/100,cost:a.cCost}}[key];
+  for(let t=0;t<=3;t++){
+    const ramp=t===0?0:(t===1?a.phase1/100:1), pk=withPark&&t>0;
+    const N=a.nonMemberVisits*Math.pow(1+a.visitorGrowth/100,t)*(1+(s.att+(pk?a.pDrop/100:0))*ramp);
+    const M=a.memberHH*Math.pow(1+a.memberGrowth/100,t)*(1+s.mem*ramp);
+    const MV=M*a.visitsPerMember;
+    const evGrow=Math.pow(1+a.eventGrowth/100,t), evF=1+(pk?a.pEventDrop/100:0)*ramp;
+    const evt=a.eventRev*evGrow*evF, E=a.eventAttendees*evGrow*evF;
+    const adm=N*s.price, don=N*s.part*(pk?1-a.pFatigue/100:1)*s.gift, mem=M*a.dues;
+    const car=a.pCar/100;
+    const veh=pk?(N*car+MV*car*(1-a.pMemDisc/100)+E*car)/Math.max(a.pPPV,.1):0;
+    const parkG=veh*a.pFee, parkC=pk?a.pOp+(t===1?a.pSetup:0):0;
+    const rev=adm+don+mem+evt+parkG, cost=(t>0?s.cost:0)+parkC;
+    o.push({adm,don,mem,evt,park:parkG,rev,cost,parkC,progC:(t>0?s.cost:0),net:rev-cost,N,M});
+  }
+  return o;
+}
+const cum=arr=>arr[1].net+arr[2].net+arr[3].net;
+
+const $f=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+const sg=n=>(n<0?'−':'+')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+const pc=n=>(n<0?'−':'+')+Math.abs(n*100).toFixed(1)+'%';
+const kf=v=>v===0?'$0':'$'+(v/1000)+'k';
+function niceMax(m){const raw=m/4,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;const s=(f<=1?1:f<=2?2:f<=5?5:10)*p;return {step:s,max:s*Math.ceil(m/s)};}
+
+function compute(){
+  for(const k of ['sq','b','c']) R[k]={off:run(k,false),on:run(k,true)};
+}
+function cls(n){return n>0.5?'pos':n<-0.5?'neg':'';}
+
+function renderCards(){
+  const P=park?'on':'off', base=R.sq.off;
+  $('#cards').innerHTML=['sq','b','c'].map(k=>{
+    const r=R[k][P][yr], d=r.net-base[yr].net, c=cum(R[k][P])-cum(base);
+    const flat=Math.abs(d)<0.5;
+    const dt=flat?'Baseline: no change':(d>0?'▲ ':'▼ ')+sg(d)+' vs. status quo ('+pc(d/base[yr].net)+')';
+    return `<article class="card"><h3>${SC[k]}${park?' + parking':''}</h3><p class="desc">${DESC[k]}</p>
+      <div class="big">${$f(r.net)}</div><div class="lbl">Year ${yr} net revenue</div>
+      <div class="delta ${flat?'flat':d>0?'good':'bad'}">${dt}</div>
+      <div class="cum">3-year total vs. status quo: <b>${Math.abs(c)<0.5?'no change':sg(c)}</b></div></article>`;
+  }).join('');
+}
+
+function drawChart(){
+  const P=park?'on':'off', el=$('#chart'), w=Math.max(300,$('#cw').clientWidth), h=320;
+  const m={t:20,r:10,b:48,l:48};
+  const cols=[{k:'today',r:R.sq.off[0]},{k:'sq',r:R.sq[P][yr]},{k:'b',r:R.b[P][yr]},{k:'c',r:R.c[P][yr]}];
+  const mx=Math.max(...cols.map(c=>c.r.rev)), ns=niceMax(mx);
+  const iw=w-m.l-m.r, ih=h-m.t-m.b, band=iw/cols.length, bw=Math.min(84,band*.62);
+  const Y=v=>m.t+ih-(v/ns.max)*ih;
+  let s=`<svg></svg>`.slice(0,0);
+  for(let v=0;v<=ns.max+1;v+=ns.step) s+=`<line class="grid" x1="${m.l}" x2="${w-m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${kf(v)}</text>`;
+  cols.forEach((c,i)=>{
+    const x=m.l+band*i+(band-bw)/2; let acc=0;
+    STREAMS.forEach(([sk,sn])=>{
+      const v=c.r[sk]; if(v<=0.5)return;
+      const y1=Y(acc+v), hh=Y(acc)-y1; acc+=v;
+      s+=`<rect class="seg-r" style="fill:var(--c-${sk})" x="${x}" y="${y1}" width="${bw}" height="${Math.max(hh,0)}" data-n="${c.k==='today'?'Today':SC[c.k]}" data-s="${sn}" data-v="${v}" data-t="${c.r.rev}"/>`;
+    });
+    s+=`<text class="tot" x="${x+bw/2}" y="${Y(acc)-6}" text-anchor="middle">${$f(c.r.rev)}</text>`;
+    const L=SCLINES[c.k];
+    L.forEach((ln,j)=>{s+=`<text x="${x+bw/2}" y="${h-m.b+18+j*15}" text-anchor="middle">${ln}</text>`;});
+  });
+  el.setAttribute('viewBox',`0 0 ${w} ${h}`); el.setAttribute('height',h); el.innerHTML=s;
+}
+function renderLegend(){
+  $('#legend').innerHTML=STREAMS.filter(([k])=>k!=='park'||park).map(([k,n])=>`<span><i style="background:var(--c-${k})"></i>${n}</span>`).join('');
+  $('#chartSub').textContent=`Year ${yr} total revenue by source${park?', with a parking fee':', no parking fee'}. “Today” is the current year for reference.`;
+}
+function renderTable(){
+  const P=park?'on':'off';
+  $('#tblTitle').textContent=`The numbers for Year ${yr}`;
+  const cols=[['Today',R.sq.off[0]],['Status quo',R.sq[P][yr]],['Donation + admission',R.b[P][yr]],['Donation only',R.c[P][yr]]];
+  const rows=[['Museum admission','adm'],['Suggested donations','don'],['Membership','mem'],['Special events','evt'],['Parking fees','park']];
+  let h='<thead><tr><th></th>'+cols.map(c=>`<th>${c[0]}</th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach(([n,k])=>{h+=`<tr><td>${n}</td>`+cols.map(c=>`<td>${c[1][k]>0.5?$f(c[1][k]):'—'}</td>`).join('')+'</tr>';});
+  h+='<tr class="total"><td>Total revenue</td>'+cols.map(c=>`<td>${$f(c[1].rev)}</td>`).join('')+'</tr>';
+  h+='<tr><td>New costs</td>'+cols.map(c=>`<td>${c[1].cost>0.5||c[1].cost<-0.5?$f(-c[1].cost):'—'}</td>`).join('')+'</tr>';
+  h+='<tr class="sum"><td>Net revenue</td>'+cols.map(c=>`<td>${$f(c[1].net)}</td>`).join('')+'</tr>';
+  h+='<tr><td>Change vs. today</td>'+cols.map((c,i)=>{const d=c[1].net-R.sq.off[0].net;return i===0?'<td>—</td>':`<td class="${cls(d)}">${sg(d)}</td>`;}).join('')+'</tr>';
+  h+='<tr><td>Visits by non-members</td>'+cols.map(c=>`<td>${Math.round(c[1].N).toLocaleString('en-US')}</td>`).join('')+'</tr>';
+  h+='<tr><td>Member households</td>'+cols.map(c=>`<td>${Math.round(c[1].M).toLocaleString('en-US')}</td>`).join('')+'</tr></tbody>';
+  $('#tbl').innerHTML=h;
+}
+function renderMatrix(){
+  const b0=cum(R.sq.off);
+  let h='<thead><tr><th>Admission model</th><th>No parking fee</th><th>With parking fee</th></tr></thead><tbody>';
+  ['sq','b','c'].forEach(k=>{
+    h+=`<tr><td>${SC[k]}</td>`+['off','on'].map(p=>{const d=cum(R[k][p])-b0;return k==='sq'&&p==='off'?`<td class="cellv">Baseline</td>`:`<td class="cellv ${cls(d)}">${sg(d)}</td>`;}).join('')+'</tr>';
+  });
+  $('#matrix').innerHTML=h+'</tbody>';
+}
+function renderRead(){
+  const P=park?'on':'off', c=R.c[P][yr], s=R.sq[P][yr], a=A;
+  const need=(s.net-(c.net-c.don))/c.N, got=c.don/c.N;
+  let r1;
+  if(need<=0) r1=`<div><span class="k">Already ahead</span><p>Even with no donations, Option C matches the status quo in Year ${yr} under these assumptions. Check the visit and membership numbers.</p></div>`;
+  else{
+    const part=need/(a.cGift*(1-(park?a.pFatigue/100:0)));
+    r1=`<div><span class="k">${$f(need)} per visit</span><p>Free entry needs about this much in donations from every non-member visit in Year ${yr} to match the status quo. Your assumptions give ${$f(got)}. Today’s average ticket is ${$f(a.avgTicket)}. At a ${$f(a.cGift)} average gift, that means ${part>1?'more than every visitor giving':Math.round(part*100)+'% of visitors giving'}.</p></div>`;
+  }
+  const bd=R.b[P][yr].net-s.net;
+  const r2=`<div><span class="k ${''}">${sg(bd)}</span><p>Year ${yr} difference between keeping admission and adding a suggested gift (Option B) and the status quo${park?', both with parking':''}. The risk is low because the ticket stays.</p></div>`;
+  const lost=R.c.off[yr].mem-R.sq.off[yr].mem;
+  const r3=`<div><span class="k">${sg(lost)}</span><p>Membership revenue change in Year ${yr} if free entry weakens the case for joining (Option C). Small changes in this one input can swing the result.</p></div>`;
+  $('#read').innerHTML=r1+r2+r3;
+}
+function renderPark(){
+  $('#parkSub').textContent=`Year ${yr}. Compares each option with and without the fee: what parking brings in, what it costs, and what it takes away from other revenue.`;
+  let h='<thead><tr><th>Option</th><th>Parking fees</th><th>Parking costs</th><th>Revenue lost elsewhere</th><th>Net effect of the fee</th></tr></thead><tbody>';
+  ['sq','b','c'].forEach(k=>{
+    const on=R[k].on[yr], off=R[k].off[yr];
+    const lost=(on.adm+on.don+on.mem+on.evt)-(off.adm+off.don+off.mem+off.evt);
+    const net=on.net-off.net;
+    h+=`<tr><td>${SC[k]}</td><td>${$f(on.park)}</td><td>${$f(-on.parkC)}</td><td class="${cls(lost)}">${sg(lost)}</td><td class="${cls(net)}"><b>${sg(net)}</b></td></tr>`;
+  });
+  $('#parkTable').innerHTML=h+'</tbody>';
+}
+function renderAll(){compute();renderCards();renderLegend();drawChart();renderMatrix();renderRead();renderPark();renderTable();}
+
+// inputs
+(function build(){
+  let h='';
+  SCHEMA.forEach(g=>{
+    h+=`<fieldset><legend>${g.t}</legend>`;
+    g.items.forEach(([k,l,u,hint])=>{
+      h+=`<div class="field"><label for="f_${k}">${l}</label><div class="inp">${u==='$'?'<span class="pre">$</span>':''}<input id="f_${k}" data-k="${k}" type="number" inputmode="decimal" step="any" value="${A[k]}">${u==='%'?'<span class="suf">%</span>':''}</div>${hint?`<div class="h">${hint}</div>`:''}</div>`;
+    });
+    h+='</fieldset>';
+  });
+  $('#fields').style.cssText='display:flex;flex-direction:column;gap:14px';
+  $('#fields').innerHTML=h;
+})();
+$('#fields').addEventListener('input',e=>{
+  const k=e.target.dataset.k; if(!k)return;
+  const v=parseFloat(e.target.value); if(isNaN(v))return;
+  A[k]=v; save(); renderAll();
+});
+$('#reset').addEventListener('click',()=>{
+  A={...DEF}; save();
+  document.querySelectorAll('#fields input').forEach(i=>{i.value=A[i.dataset.k];});
+  renderAll();
+});
+function setPark(on){park=on;$('#pOn').setAttribute('aria-pressed',on);$('#pOff').setAttribute('aria-pressed',!on);renderAll();}
+$('#pOn').onclick=()=>setPark(true);$('#pOff').onclick=()=>setPark(false);
+document.querySelectorAll('[data-y]').forEach(b=>b.onclick=()=>{
+  yr=+b.dataset.y;document.querySelectorAll('[data-y]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderAll();
+});
+// tooltip
+const tip=$('#tip'),cw=$('#cw');
+cw.addEventListener('pointermove',e=>{
+  const t=e.target.closest&&e.target.closest('rect.seg-r');
+  if(!t){tip.style.opacity=0;return;}
+  const v=+t.dataset.v,tot=+t.dataset.t;
+  tip.innerHTML=`<b>${t.dataset.n}</b><br>${t.dataset.s}: ${$f(v)} (${Math.round(v/tot*100)}% of ${$f(tot)})`;
+  const r=cw.getBoundingClientRect();
+  let x=e.clientX-r.left+12,y=e.clientY-r.top-10;
+  if(x>r.width-200)x=e.clientX-r.left-210;
+  tip.style.left=x+'px';tip.style.top=Math.max(0,y-40)+'px';tip.style.opacity=1;
+});
+cw.addEventListener('pointerleave',()=>{tip.style.opacity=0;});
+if(window.ResizeObserver)new ResizeObserver(()=>drawChart()).observe(cw);
+renderAll();
+</script>
+
+</body>
+</html>
